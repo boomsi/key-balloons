@@ -39,7 +39,7 @@ ctest --test-dir build --build-config Release --output-on-failure
 - `tests/tst_balloons.qml` 覆盖相同键重复输入、不同到期时间和 60 个气球的突发输入。
 - `tests/tst_stress.qml` 在可见窗口里模拟每秒 20 次输入，持续 30 秒。测试输出帧间隔及气球创建到下一帧的第 95 百分位。系统键盘事件到画面的总延迟需要另行实测。
 
-在桌面上运行持续动画测试：
+在桌面上可以运行持续动画测试。
 
 ```sh
 ./build/key_balloons_tests -input tests/tst_stress.qml
