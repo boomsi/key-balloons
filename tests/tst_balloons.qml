@@ -145,6 +145,17 @@ TestCase {
         verify(overlay.visible)
     }
 
+    function test_settingsFocusFirstControlAndCloseOnEscape() {
+        const overlay = createTemporaryObject(overlayComponent, null, { visible: true })
+        const box = findChild(overlay, "boxInput")
+        const menu = findChild(overlay, "boxMenu")
+        const dragSwitch = findChild(overlay, "draggingSwitch")
+        mouseClick(box, box.width / 2, box.height / 2, Qt.RightButton)
+        tryCompare(dragSwitch, "activeFocus", true)
+        keyClick(Qt.Key_Escape)
+        tryCompare(menu, "visible", false)
+    }
+
     function test_appendRepeatedLabels() {
         const field = createTemporaryObject(fieldComponent, testCase)
         const first = field.spawn("A")

@@ -79,6 +79,14 @@ NSStackView *settingsRow(NSView *label, NSView *control)
     ]];
 }
 
+- (void)viewDidAppear
+{
+    [super viewDidAppear];
+    auto *window = self.view.window;
+    [window makeKeyWindow];
+    [window makeFirstResponder:dragging_];
+}
+
 - (void)updateControls
 {
     (void)self.view;
@@ -174,5 +182,7 @@ void MacSettingsPopover::toggle()
     const bool fitsRight = NSMaxX(workArea) - NSMaxX(box) >= requiredWidth;
     const bool fitsLeft = NSMinX(box) - NSMinX(workArea) >= requiredWidth;
     const NSRectEdge side = fitsRight || !fitsLeft ? NSMaxXEdge : NSMinXEdge;
+    if (!NSApp.active)
+        [NSApp activate];
     [native_->popover showRelativeToRect:view.bounds ofView:view preferredEdge:side];
 }

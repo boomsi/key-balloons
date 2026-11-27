@@ -53,6 +53,7 @@ Window {
         }
         boxMenu.show()
         boxMenu.requestActivate()
+        draggingSwitch.forceActiveFocus(Qt.PopupFocusReason)
     }
 
     GlassBox {
@@ -87,20 +88,17 @@ Window {
         color: "transparent"
         onActiveChanged: if (!active) hide()
 
-        Shortcut {
-            sequence: "Escape"
-            onActivated: boxMenu.hide()
-        }
-
         Pane {
             id: settingsPane
             anchors.fill: parent
             padding: 12
+            Keys.onEscapePressed: boxMenu.hide()
 
             contentItem: ColumnLayout {
                 spacing: 8
 
                 Switch {
+                    id: draggingSwitch
                     objectName: "draggingSwitch"
                     text: qsTr("Allow dragging")
                     checked: overlay.allowDragging
