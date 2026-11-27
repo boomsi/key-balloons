@@ -1,19 +1,23 @@
-# Key Balloons
+# <img src="assets/KeyBalloons.svg" alt="Key Balloons のアイコン" width="36"> Key Balloons
 
 [English](README.md) · [简体中文](README.zh.md) · [繁體中文](README.zh-TW.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md)
 
-<img src="assets/KeyBalloons.svg" alt="Key Balloons のアイコン" width="112">
-
 Key Balloons は macOS と Windows 用のデスクトップオーバーレイです。どのアプリで入力しても、輪郭付きのキーラベルがフローティングボックスから浮かび、約 2 秒で消えます。同じキーを繰り返し押しても、押すたびに個別にアニメーションします。
 
-キー入力は端末上でアニメーションを表示するために使われます。入力履歴は保存せず、キー入力をネットワークに送信することもありません。
+**[ダウンロード](https://github.com/boomsi/key-balloons/releases)** · [インストール](#インストール) · [使い方](#使い方) · [ソースからビルドする](#ソースからビルドする) · [連携ガイド](docs/mouse-feedback.ja.md)
+
+![Key Balloons のデモ。kissmenow と入力するとキーがボックスから浮かびます](assets/key-balloons-demo.gif)
+
+> キー入力は端末上でアニメーションを表示するために使われます。入力履歴は保存せず、キー入力をネットワークに送信することもありません。
 
 ## インストール
 
 [GitHub Releases](https://github.com/boomsi/key-balloons/releases) から対応するインストーラーをダウンロードします。
 
-- **macOS** ユニバーサル版の `.dmg` を開き、**KeyBalloons.app** を「アプリケーション」にドラッグして、そこから起動します。
-- **Windows** x64 の `.exe` インストーラーを実行し、スタートメニューから **Key Balloons** を起動します。
+| プラットフォーム | インストール手順 |
+| --- | --- |
+| macOS | ユニバーサル版の `.dmg` を開き、**KeyBalloons.app** を「アプリケーション」にドラッグして、そこから起動します。 |
+| Windows | x64 の `.exe` インストーラーを実行し、スタートメニューから **Key Balloons** を起動します。 |
 
 ### macOS で入力監視を許可する
 
@@ -25,12 +29,17 @@ Key Balloons は macOS と Windows 用のデスクトップオーバーレイで
 
 ## 使い方
 
-- 普段のアプリで入力すると、最前面のボックスに押したキーごとのラベルが表示されます。
-- ボックスの右クリックとメニューバーまたは通知領域の **Settings…（設定…）** は、同じ設定パネルを開きます。
+普段のアプリで入力すると、最前面のボックスに押したキーごとのラベルが表示されます。
+
+左クリック、右クリック、スクロールまたはホイールの押し込みで、それぞれ左側、右側、中央が光ります。**詳細設定** から[ローカルマウス連携](docs/mouse-feedback.ja.md)を有効にできます。
+
+### 設定
+
+ボックスの右クリックとメニューバーまたは通知領域の **Settings…（設定…）** は、同じ設定パネルを開きます。
+
 - **外観** の **サイズ**（50%～150%）と **不透明度**（20%～100%）は、ボックスとラベルの両方に反映されます。
 - **位置** で **ドラッグを許可** をオンにすると左ボタンで移動できます。**画面下端に吸着** は、ボタンを放したときに最も近い画面の使用可能領域の下端に配置します。
 - **言語** の変更はすぐに反映され、次回の起動にも引き継がれます。初期設定は英語です。
-- 左クリック、右クリック、スクロールまたはホイールの押し込みで、それぞれ左側、右側、中央が光ります。**詳細設定** から[ローカルマウス連携](docs/mouse-feedback.ja.md)を有効にできます。
 - メニューにはアプリのメモリ使用量と監視の状態が表示されます。監視の一時停止と再開、アプリの終了もここから行えます。
 
 Xcode 26 以降でビルドした場合、macOS 26 ではネイティブの Liquid Glass パネルが使われます。macOS で操作スペースを切り替えても、ボックスとアニメーションは設定した位置を保ちます。
@@ -39,16 +48,19 @@ Xcode 26 以降でビルドした場合、macOS 26 ではネイティブの Liqu
 
 CMake 3.21 以降、Qt Quick、Qt Quick Test、Qt Linguist のツールを含む Qt 6.10 デスクトップ SDK、Xcode または Visual Studio 2022 の C++ ツールチェーンが必要です。以下の例では Qt 6.10.3 を使用します。
 
-**macOS**
+### macOS
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON \
+  -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 open build/KeyBalloonsDev.app
 ```
 
-**Windows（PowerShell）**
+### Windows（PowerShell）
 
 ```powershell
 $qt = "$env:USERPROFILE/Qt/6.10.3/msvc2022_64"

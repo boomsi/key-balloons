@@ -1,19 +1,23 @@
-# Key Balloons
+# <img src="assets/KeyBalloons.svg" alt="Icône de Key Balloons" width="36"> Key Balloons
 
 [English](README.md) · [简体中文](README.zh.md) · [繁體中文](README.zh-TW.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md)
 
-<img src="assets/KeyBalloons.svg" alt="Icône de Key Balloons" width="112">
-
 Key Balloons affiche un boîtier flottant sur macOS et Windows. Lorsque vous tapez dans une application, les touches s’élèvent au-dessus du boîtier puis disparaissent en deux secondes environ. Chaque frappe a sa propre animation, même si vous répétez la même touche.
 
-Les frappes servent à afficher les animations sur votre appareil. L’application ne conserve aucun historique des frappes et ne les transmet pas sur le réseau.
+**[Télécharger](https://github.com/boomsi/key-balloons/releases)** · [Installation](#installation) · [Utilisation](#utilisation) · [Compilation depuis les sources](#compilation-depuis-les-sources) · [Guide d’intégration](docs/mouse-feedback.fr.md)
+
+![Démonstration de Key Balloons : les touches flottent à mesure que l’on saisit kissmenow](assets/key-balloons-demo.gif)
+
+> Les frappes servent à afficher les animations sur votre appareil. L’application ne conserve aucun historique des frappes et ne les transmet pas sur le réseau.
 
 ## Installation
 
 Téléchargez le programme correspondant à votre système depuis [GitHub Releases](https://github.com/boomsi/key-balloons/releases).
 
-- **macOS** Ouvrez le fichier universel `.dmg`, glissez **KeyBalloons.app** dans Applications puis ouvrez-le depuis ce dossier.
-- **Windows** Lancez le programme d’installation x64 `.exe`, puis ouvrez **Key Balloons** depuis le menu Démarrer.
+| Plateforme | Étapes d’installation |
+| --- | --- |
+| macOS | Ouvrez le fichier universel `.dmg`, glissez **KeyBalloons.app** dans Applications puis ouvrez-le depuis ce dossier. |
+| Windows | Lancez le programme d’installation x64 `.exe`, puis ouvrez **Key Balloons** depuis le menu Démarrer. |
 
 ### Surveillance de l’entrée sur macOS
 
@@ -25,12 +29,17 @@ Après une mise à jour, utilisez **−** pour retirer une éventuelle ancienne 
 
 ## Utilisation
 
-- Tapez dans votre application habituelle. Le boîtier reste au premier plan et affiche un libellé par frappe.
-- Faites un clic droit sur le boîtier ou choisissez **Settings… (Réglages…)** dans la barre des menus ou la zone de notification pour ouvrir le même panneau.
+Tapez dans votre application habituelle. Le boîtier reste au premier plan et affiche un libellé par frappe.
+
+Les clics gauche et droit éclairent leur côté. Le défilement ou le clic sur la molette éclaire le centre. Dans **Avancé**, activez les [intégrations locales de la souris](docs/mouse-feedback.fr.md).
+
+### Réglages
+
+Faites un clic droit sur le boîtier ou choisissez **Settings… (Réglages…)** dans la barre des menus ou la zone de notification pour ouvrir le même panneau.
+
 - Dans **Apparence**, **Taille** (50 % à 150 %) et **Opacité** (20 % à 100 %) s’appliquent au boîtier et aux libellés.
 - Dans **Position**, activez **Autoriser le déplacement** pour déplacer le boîtier avec le bouton gauche. **Ancrer en bas de l’écran** le place au bas de la zone utilisable de l’écran le plus proche lorsque vous le relâchez.
 - **Langue** change immédiatement l’interface et mémorise votre choix. L’anglais est la langue par défaut.
-- Les clics gauche et droit éclairent leur côté. Le défilement ou le clic sur la molette éclaire le centre. Dans **Avancé**, activez les [intégrations locales de la souris](docs/mouse-feedback.fr.md).
 - Le menu affiche la mémoire utilisée par l’application et l’état de la surveillance. Il sert aussi à suspendre ou reprendre la surveillance et à quitter.
 
 Sur macOS 26, une compilation avec Xcode 26 ou une version ultérieure utilise un panneau Liquid Glass avec des commandes natives. Lorsque vous changez d’espace sur macOS, le boîtier et les animations gardent leur position.
@@ -39,16 +48,19 @@ Sur macOS 26, une compilation avec Xcode 26 ou une version ultérieure utilise u
 
 Installez CMake 3.21 ou ultérieur, le SDK de bureau Qt 6.10 avec Qt Quick, Qt Quick Test et les outils Qt Linguist, ainsi que Xcode ou les outils C++ de Visual Studio 2022. Les commandes utilisent Qt 6.10.3.
 
-**macOS**
+### macOS
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON \
+  -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 open build/KeyBalloonsDev.app
 ```
 
-**Windows (PowerShell)**
+### Windows (PowerShell)
 
 ```powershell
 $qt = "$env:USERPROFILE/Qt/6.10.3/msvc2022_64"

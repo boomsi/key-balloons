@@ -1,19 +1,23 @@
-# Key Balloons
+# <img src="assets/KeyBalloons.svg" alt="Key Balloons 앱 아이콘" width="36"> Key Balloons
 
 [English](README.md) · [简体中文](README.zh.md) · [繁體中文](README.zh-TW.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md)
 
-<img src="assets/KeyBalloons.svg" alt="Key Balloons 앱 아이콘" width="112">
-
 Key Balloons는 macOS와 Windows용 데스크톱 오버레이입니다. 어떤 앱에서든 글을 입력하면 윤곽선이 있는 키 이름이 떠 있는 상자에서 올라와 약 2초 후 사라집니다. 같은 키를 반복해서 눌러도 누를 때마다 별도 애니메이션이 표시됩니다.
 
-키 입력은 기기에서 애니메이션을 표시하는 데만 사용됩니다. 키 입력 기록을 보관하거나 네트워크로 보내지 않습니다.
+**[다운로드](https://github.com/boomsi/key-balloons/releases)** · [설치](#설치) · [사용](#사용) · [소스에서 빌드](#소스에서-빌드) · [연동 가이드](docs/mouse-feedback.ko.md)
+
+![Key Balloons 데모. kissmenow를 입력하면 상자에서 키가 떠오릅니다](assets/key-balloons-demo.gif)
+
+> 키 입력은 기기에서 애니메이션을 표시하는 데만 사용됩니다. 키 입력 기록을 보관하거나 네트워크로 보내지 않습니다.
 
 ## 설치
 
 [GitHub Releases](https://github.com/boomsi/key-balloons/releases)에서 운영체제에 맞는 설치 파일을 다운로드합니다.
 
-- **macOS** 유니버설 `.dmg`를 열고 **KeyBalloons.app**을 응용 프로그램 폴더로 드래그한 다음 그곳에서 실행합니다.
-- **Windows** x64 `.exe` 설치 프로그램을 실행한 뒤 시작 메뉴에서 **Key Balloons**를 엽니다.
+| 플랫폼 | 설치 단계 |
+| --- | --- |
+| macOS | 유니버설 `.dmg`를 열고 **KeyBalloons.app**을 응용 프로그램 폴더로 드래그한 다음 그곳에서 실행합니다. |
+| Windows | x64 `.exe` 설치 프로그램을 실행한 뒤 시작 메뉴에서 **Key Balloons**를 엽니다. |
 
 ### macOS에서 입력 모니터링 허용
 
@@ -25,12 +29,17 @@ Key Balloons는 macOS와 Windows용 데스크톱 오버레이입니다. 어떤 �
 
 ## 사용
 
-- 평소 사용하는 앱에서 입력하면 상자가 맨 위에 유지되며 입력 한 번당 키 이름 하나를 표시합니다.
-- 상자를 오른쪽 클릭하거나 메뉴 막대 또는 알림 영역에서 **Settings…(설정…)**를 선택하면 같은 패널이 열립니다.
+평소 사용하는 앱에서 입력하면 상자가 맨 위에 유지되며 입력 한 번당 키 이름 하나를 표시합니다.
+
+왼쪽 클릭, 오른쪽 클릭, 휠을 스크롤하거나 누르기는 각각 왼쪽, 오른쪽, 가운데를 밝힙니다. **고급**에서 [로컬 마우스 연동](docs/mouse-feedback.ko.md)을 켤 수 있습니다.
+
+### 설정
+
+상자를 오른쪽 클릭하거나 메뉴 막대 또는 알림 영역에서 **Settings…(설정…)**를 선택하면 같은 패널이 열립니다.
+
 - **모양**의 **크기**(50%–150%)와 **불투명도**(20%–100%)는 상자와 키 이름에 함께 적용됩니다.
 - **위치**에서 **드래그 허용**을 켜면 왼쪽 버튼으로 상자를 움직일 수 있습니다. **화면 하단에 붙이기**를 켜면 놓을 때 가장 가까운 화면의 사용 가능 영역 하단에 붙습니다.
 - **언어**를 변경하면 즉시 적용되고 선택이 저장됩니다. 기본 언어는 영어입니다.
-- 왼쪽 클릭, 오른쪽 클릭, 휠을 스크롤하거나 누르기는 각각 왼쪽, 오른쪽, 가운데를 밝힙니다. **고급**에서 [로컬 마우스 연동](docs/mouse-feedback.ko.md)을 켤 수 있습니다.
 - 메뉴에는 앱의 메모리 사용량과 모니터링 상태가 표시됩니다. 모니터링을 일시 정지하거나 다시 켜고 앱을 종료할 수도 있습니다.
 
 Xcode 26 이상으로 빌드하면 macOS 26에서 네이티브 Liquid Glass 설정 패널이 사용됩니다. macOS에서 Spaces를 전환해도 상자와 애니메이션은 선택한 위치에 함께 유지됩니다.
@@ -39,16 +48,19 @@ Xcode 26 이상으로 빌드하면 macOS 26에서 네이티브 Liquid Glass 설�
 
 CMake 3.21 이상, Qt Quick과 Qt Quick Test 및 Qt Linguist 도구가 포함된 Qt 6.10 데스크톱 SDK, Xcode 또는 Visual Studio 2022 C++ 도구 체인이 필요합니다. 예제는 Qt 6.10.3을 사용합니다.
 
-**macOS**
+### macOS
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON \
+  -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 open build/KeyBalloonsDev.app
 ```
 
-**Windows(PowerShell)**
+### Windows(PowerShell)
 
 ```powershell
 $qt = "$env:USERPROFILE/Qt/6.10.3/msvc2022_64"

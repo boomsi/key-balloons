@@ -1,19 +1,23 @@
-# Key Balloons
+# <img src="assets/KeyBalloons.svg" alt="Key Balloons 应用图标" width="36"> Key Balloons
 
 [English](README.md) · [简体中文](README.zh.md) · [繁體中文](README.zh-TW.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md)
 
-<img src="assets/KeyBalloons.svg" alt="Key Balloons 应用图标" width="112">
-
 Key Balloons 是一个 macOS 和 Windows 的桌面小工具。在任何应用里打字时，带细描边的按键字符会从悬浮盒口弹出，约 2 秒后淡出。每次按键都会产生独立动画，连续按同一个键也会逐个显示。
 
-键盘输入只在本机用来显示动画。应用不会保存按键记录或把按键发送到网络。
+**[下载安装包](https://github.com/boomsi/key-balloons/releases)** · [安装](#安装) · [使用](#使用) · [从源码构建](#从源码构建) · [接入指南](docs/mouse-feedback.zh.md)
+
+![Key Balloons 演示：输入 kissmenow 时，按键从盒子里浮起](assets/key-balloons-demo.gif)
+
+> 键盘输入只在本机用来显示动画。应用不会保存按键记录或把按键发送到网络。
 
 ## 安装
 
 从 [GitHub Releases](https://github.com/boomsi/key-balloons/releases) 下载对应的安装包。
 
-- **macOS** 打开通用版 `.dmg`，把 **KeyBalloons.app** 拖进「应用程序」，再从那里启动。
-- **Windows** 运行 x64 `.exe` 安装程序，从开始菜单打开 **Key Balloons**。
+| 平台 | 安装步骤 |
+| --- | --- |
+| macOS | 打开通用版 `.dmg`，把 **KeyBalloons.app** 拖进「应用程序」，再从那里启动。 |
+| Windows | 运行 x64 `.exe` 安装程序，从开始菜单打开 **Key Balloons**。 |
 
 ### 在 macOS 上开启输入监控
 
@@ -25,12 +29,17 @@ Key Balloons 是一个 macOS 和 Windows 的桌面小工具。在任何应用里
 
 ## 使用
 
-- 切到常用应用直接打字。盒子保持置顶，每次实际按键都显示一个字符。
-- 右键盒子，或从菜单栏、通知区域选择 **Settings…（设置…）**，都会打开同一个面板。
+切到常用应用直接打字。盒子保持置顶，每次实际按键都显示一个字符。
+
+左键、右键、滚动或按下滚轮对应点亮左侧、右侧和中间。在 **高级** 开启本机鼠标接入，即可[发送或订阅鼠标反馈事件](docs/mouse-feedback.zh.md)。
+
+### 设置
+
+右键盒子，或从菜单栏、通知区域选择 **Settings…（设置…）**，都会打开同一个面板。
+
 - 在 **外观** 调整 **大小**（50%–150%）和 **不透明度**（20%–100%），同时作用于盒子和浮动字符。
 - 在 **位置** 开启 **允许拖动** 后，可以按住左键移动盒子。勾选 **自动贴底**，松手时会吸附到最近屏幕的可用区域底边。
 - **语言** 可以即时切换，选择会保存。首次使用默认为英文。
-- 左键、右键、滚动或按下滚轮对应点亮左侧、右侧和中间。在 **高级** 开启本机鼠标接入，即可[发送或订阅鼠标反馈事件](docs/mouse-feedback.zh.md)。
 - 菜单栏或通知区域显示应用当前内存占用和监听状态，也可以暂停、恢复监听或退出。
 
 使用 Xcode 26 或更新版本构建时，macOS 26 上的设置使用系统 Liquid Glass 弹出面板和原生控件。
@@ -40,16 +49,19 @@ Key Balloons 是一个 macOS 和 Windows 的桌面小工具。在任何应用里
 
 需要 CMake 3.21 或更新版本、含 Qt Quick、Qt Quick Test 和 Qt Linguist 工具的 Qt 6.10 桌面 SDK，以及 Xcode 或 Visual Studio 2022 的 C++ 工具链。以下示例使用 Qt 6.10.3。
 
-**macOS**
+### macOS
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
+cmake -S . -B build \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON \
+  -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 open build/KeyBalloonsDev.app
 ```
 
-**Windows（PowerShell）**
+### Windows（PowerShell）
 
 ```powershell
 $qt = "$env:USERPROFILE/Qt/6.10.3/msvc2022_64"
