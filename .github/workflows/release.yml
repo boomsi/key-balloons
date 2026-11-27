@@ -1,0 +1,121 @@
+name: Release installers
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-installers-${{ github.event.release.tag_name || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Package ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            qt-arch: clang_64
+            platform: macos
+            extension: dmg
+          - os: windows-2022
+            qt-arch: win64_msvc2022_64
+            platform: windows
+            extension: exe
+
+    steps:
+      - uses: actions/checkout@v5.1.0
+        with:
+          persist-credentials: false
+      - uses: jurplel/install-qt-action@v4.5.0
+        with:
+          version: '6.10.3'
+          arch: ${{ matrix.qt-arch }}
+          archives: qtbase qtdeclarative
+          cache: true
+
+      - name: Configure macOS universal build
+        if: runner.os == 'macOS'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+      - name: Configure Windows x64 build
+        if: runner.os == 'Windows'
+        run: cmake -S . -B build -A x64
+      - run: cmake --build build --config Release --parallel 2
+      - run: ctest --test-dir build --build-config Release --output-on-failure
+      - run: cpack --config build/CPackConfig.cmake -C Release -B dist
+
+      - name: Verify macOS disk image
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          images=(dist/*.dmg)
+          image="${images[0]}"
+          hdiutil verify "$image"
+          mount_point="$RUNNER_TEMP/key-balloons-dmg"
+          mkdir -p "$mount_point"
+          hdiutil attach "$image" -readonly -nobrowse -mountpoint "$mount_point"
+          trap 'hdiutil detach "$mount_point"' EXIT
+          bundle="$mount_point/KeyBalloons.app"
+          lipo "$bundle/Contents/MacOS/KeyBalloons" -verify_arch arm64 x86_64
+          test "$(readlink "$mount_point/Applications")" = /Applications
+          test -f "$bundle/Contents/Resources/qml/QtQuick/qmldir"
+          codesign --verify --deep --strict "$bundle"
+
+      - name: Verify Windows installation
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem dist -Filter '*.exe' -File
+          if (@($installer).Count -ne 1) { throw 'Expected one Windows installer.' }
+          $installDirectory = Join-Path $env:RUNNER_TEMP 'key-balloons-install'
+          $install = Start-Process -FilePath $installer.FullName -ArgumentList '/S', "/D=$installDirectory" -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "Installer exited with code $($install.ExitCode)." }
+          foreach ($file in 'bin/KeyBalloons.exe', 'bin/Qt6Core.dll', 'bin/msvcp140.dll', 'bin/vcruntime140.dll') {
+            if (-not (Test-Path -LiteralPath (Join-Path $installDirectory $file) -PathType Leaf)) {
+              throw "Missing installed file: $file"
+            }
+          }
+          foreach ($plugin in 'qwindows.dll', 'qtquick2plugin.dll') {
+            if (-not (Get-ChildItem -LiteralPath $installDirectory -Filter $plugin -File -Recurse)) {
+              throw "Missing installed Qt plugin: $plugin"
+            }
+          }
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: installer-${{ matrix.platform }}
+          path: dist/*.${{ matrix.extension }}
+          if-no-files-found: error
+          overwrite: true
+          compression-level: 0
+
+  publish:
+    name: Attach installers to release
+    if: github.event_name == 'release'
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: installer-*
+          path: assets
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          uploaded=$(gh release view --repo "$GITHUB_REPOSITORY" --json assets \
+            --jq '.assets[] | select(.state == "uploaded") | .name' -- "$RELEASE_TAG")
+          for installer in assets/installer-macos/*.dmg assets/installer-windows/*.exe; do
+            if ! grep -Fxq -- "${installer##*/}" <<< "$uploaded"; then
+              gh release upload --repo "$GITHUB_REPOSITORY" --clobber -- "$RELEASE_TAG" "$installer"
+            fi
+          done

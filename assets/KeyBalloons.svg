@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="tile" x1="152" y1="82" x2="886" y2="970" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#253f61"/>
+      <stop offset=".54" stop-color="#16253e"/>
+      <stop offset="1" stop-color="#0e1629"/>
+    </linearGradient>
+    <radialGradient id="light" cx="0" cy="0" r="1" gradientTransform="translate(625 383) rotate(108) scale(584 554)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#719bf4" stop-opacity=".43"/>
+      <stop offset="1" stop-color="#719bf4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glass" x1="12" y1="0" x2="146" y2="166" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a3d6fc"/>
+      <stop offset=".46" stop-color="#6b9bdf"/>
+      <stop offset="1" stop-color="#3a5d9d"/>
+    </linearGradient>
+    <linearGradient id="small-glass" x1="0" y1="0" x2="136" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#dae9ff"/>
+      <stop offset=".54" stop-color="#94a9ef"/>
+      <stop offset="1" stop-color="#5975be"/>
+    </linearGradient>
+    <linearGradient id="box" x1="0" y1="601" x2="0" y2="842" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#84aee1"/>
+      <stop offset=".45" stop-color="#46648d"/>
+      <stop offset="1" stop-color="#273c5b"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="612" x2="0" y2="827" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d2e9ff"/>
+      <stop offset="1" stop-color="#7191bd"/>
+    </linearGradient>
+    <filter id="shadow" x="-22%" y="-24%" width="144%" height="168%">
+      <feDropShadow dx="0" dy="22" stdDeviation="23" flood-color="#061122" flood-opacity=".55"/>
+    </filter>
+  </defs>
+  <rect x="54" y="54" width="916" height="916" rx="221" fill="url(#tile)"/>
+  <rect x="54" y="54" width="916" height="916" rx="221" fill="url(#light)"/>
+  <rect x="59" y="59" width="906" height="906" rx="216" stroke="#aac8f7" stroke-opacity=".3" stroke-width="10"/>
+  <g filter="url(#shadow)">
+    <g transform="translate(591 199) rotate(14 77 54)">
+      <rect x="0" y="0" width="154" height="108" rx="40" fill="url(#small-glass)" stroke="#d6e2ff" stroke-width="5"/>
+      <path d="M29 35c0-10 8-16 17-16h61" stroke="#fff" stroke-opacity=".62" stroke-width="5" stroke-linecap="round"/>
+      <path d="M54 60h49m-16-17 17 17-17 17" stroke="#f0f4ff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(291 351) rotate(-13 121 84)">
+      <rect x="0" y="0" width="242" height="168" rx="59" fill="url(#glass)" stroke="#d8edff" stroke-width="7"/>
+      <rect x="12" y="12" width="218" height="144" rx="48" stroke="#cbdfff" stroke-opacity=".34" stroke-width="4"/>
+      <path d="M29 59c0-19 15-33 33-33h91" stroke="#f3f9ff" stroke-opacity=".53" stroke-width="6" stroke-linecap="round"/>
+      <path d="m88 122 32-68 32 68m-51-24h38" stroke="#f5faff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <rect x="221" y="601" width="582" height="241" rx="77" fill="url(#box)" stroke="url(#rim)" stroke-width="8"/>
+    <rect x="237" y="617" width="550" height="209" rx="62" stroke="#c2e1fd" stroke-opacity=".42" stroke-width="4"/>
+    <rect x="278" y="651" width="468" height="74" rx="37" fill="#172b4a" stroke="#bfdbfd" stroke-width="6"/>
+    <path d="M315 714h394" stroke="#8dccff" stroke-opacity=".63" stroke-width="5" stroke-linecap="round"/>
+    <path d="M467 787h90" stroke="#b9d7fa" stroke-opacity=".62" stroke-width="7" stroke-linecap="round"/>
+  </g>
+</svg>

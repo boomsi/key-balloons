@@ -70,6 +70,12 @@ int main(int argc, char *argv[])
     anchorOverlay(window, app);
 #ifdef Q_OS_MACOS
     prepareMacOverlay(window);
+    auto *flights = window.property("flightWindow").value<QQuickWindow *>();
+    if (!flights) {
+        qCritical("Key Balloons could not find the animation window.");
+        return EXIT_FAILURE;
+    }
+    prepareMacOverlay(*flights);
 #endif
     window.show();
     auto monitor = makeKeyboardMonitor();

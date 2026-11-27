@@ -16,15 +16,14 @@ Item {
             label: label,
             lifetimeMs: lifetimeMs,
             originX: width / 2 + launchOffsets[lane],
-            originY: box.y + box.mouthY,
-            rise: box.y * (0.76 + (lane % 3) * 0.06),
+            originY: height,
+            rise: height * (0.76 + (lane % 3) * 0.06),
             drift: driftOffsets[lane],
             tilt: driftOffsets[lane] / 10,
             dark: dark
         }) as KeyBalloon
         if (!balloon)
             throw new Error("Could not create a key balloon: " + balloonComponent.errorString())
-        box.pulse()
         balloon.launch()
         return balloon
     }
@@ -32,16 +31,6 @@ Item {
     Item {
         id: flights
         anchors.fill: parent
-    }
-
-    GlassBox {
-        id: box
-        width: implicitWidth
-        height: implicitHeight
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 9
-        anchors.horizontalCenter: parent.horizontalCenter
-        dark: field.dark
     }
 
     Component {

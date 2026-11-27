@@ -24,8 +24,14 @@ QIcon trayIcon()
     painter.setPen(QPen(QColor(223, 238, 255), 1.5));
     painter.setBrush(QColor(48, 77, 129));
 #endif
-    painter.drawRoundedRect(QRectF(2, 9, 14, 6.5), 2, 2);
-    painter.drawRoundedRect(QRectF(6.5, 2, 5, 4.5), 1.5, 1.5);
+    painter.drawRoundedRect(QRectF(2, 10.5, 14, 5.5), 2, 2);
+    painter.drawLine(QPointF(5, 13.25), QPointF(13, 13.25));
+    painter.save();
+    painter.translate(7, 6);
+    painter.rotate(-15);
+    painter.drawRoundedRect(QRectF(-3, -2.25, 6, 4.5), 1.5, 1.5);
+    painter.restore();
+    painter.drawRoundedRect(QRectF(12, 2, 3.2, 2.6), 0.9, 0.9);
     painter.end();
     QIcon icon(image);
 #ifdef Q_OS_MACOS
