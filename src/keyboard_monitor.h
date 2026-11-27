@@ -1,5 +1,7 @@
 #pragma once
 
+#include "mouse_feedback.h"
+
 #include <QObject>
 #include <QString>
 
@@ -15,6 +17,7 @@ public:
 
 signals:
     void keyPressed(const QString &label, bool autoRepeat);
+    void mouseFeedback(MouseFeedback feedback);
     void interrupted(const QString &reason);
 };
 

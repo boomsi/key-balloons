@@ -1,6 +1,6 @@
 # Key Balloons
 
-[简体中文](README.zh.md)
+[English](README.md) · [简体中文](README.zh.md) · [繁體中文](README.zh-TW.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md)
 
 <img src="assets/KeyBalloons.svg" alt="Key Balloons app icon" width="112">
 
@@ -26,16 +26,19 @@ After an update, the switch can still show an authorization for an older build. 
 ## Use
 
 - Type in your usual app. The box stays above it and displays one label per physical key press.
-- Hold the left mouse button on the box to move it. Right-click the box to open settings beside it, then use **Allow dragging** to lock or unlock its position.
-- Use **Opacity** to set the opacity of the box and the labels from **20% to 100%**.
-- Settings close when you switch to another app. Use the menu bar icon on macOS or the system tray on Windows to pause monitoring or quit.
+- Right-click the box or choose **Settings…** from the menu bar or system tray to open the same panel.
+- Under **Appearance**, use **Size** (50%–150%) and **Opacity** (20%–100%) to adjust the box and floating labels.
+- Under **Position**, enable **Allow dragging** to move the box with the left mouse button. **Snap box to screen bottom** moves it to the nearest screen's usable bottom edge when you release it.
+- **Language** switches the interface immediately and remembers your choice. The default is English.
+- Left clicks, right clicks, and scrolling or pressing the wheel light the left, right, and center, respectively. Enable local mouse integrations under **Advanced** to [send or subscribe to mouse feedback](docs/mouse-feedback.md).
+- The tray menu shows the app’s current memory use and monitoring status. Use it to pause or resume monitoring or quit.
 
-On macOS 26, the box settings use a system Liquid Glass popover with a native switch and slider when built with Xcode 26 or later.
+On macOS 26, the settings panel uses a system Liquid Glass popover with native controls when built with Xcode 26 or later.
 On macOS, the box stays at its chosen position across Spaces, and the animation follows it as part of the same floating group.
 
 ## Build from source
 
-You need CMake 3.21 or later, the Qt 6.10 desktop SDK with Qt Quick and Qt Quick Test, and either Xcode or the Visual Studio 2022 C++ toolchain. These examples use Qt 6.10.3.
+You need CMake 3.21 or later, the Qt 6.10 desktop SDK with Qt Quick, Qt Quick Test, and Qt Linguist tools, and either Xcode or the Visual Studio 2022 C++ toolchain. These examples use Qt 6.10.3.
 
 **macOS**
 
@@ -67,9 +70,9 @@ The macOS bundle uses ad hoc signing. Apple notarization and Windows release sig
 
 ## Project layout and tests
 
-- `qml/` contains the shared overlay and animations.
+- [`examples/basic-box/`](examples/basic-box/) contains the built-in box example, its animations, and its mouse feedback subscriber.
 - `src/macos/` and `src/windows/` handle keyboard events on their respective platforms. The macOS code also provides the native settings popover and the Input Monitoring guide.
-- `tests/tst_balloons.qml` covers rapid input, independent expiry, drag locking, focus loss, and opacity.
+- `tests/tst_balloons.qml` covers rapid input, independent expiry, dragging, mouse feedback, and settings. `tests/tst_overlay_core.cpp` covers screen placement, local integration, translation catalogs, and memory reporting.
 - `tests/tst_stress.qml` simulates 20 inputs per second for 30 seconds and reports the 95th-percentile frame interval and time from label creation to the next Qt frame. Measuring physical key-to-display latency requires a separate test.
 
 Use this command to run the sustained animation test on a desktop.
@@ -78,4 +81,4 @@ Use this command to run the sustained animation test on a desktop.
 ./build/key_balloons_tests -input tests/tst_stress.qml
 ```
 
-On Windows, use `./build/Release/key_balloons_tests.exe`. For a quick end-to-end check, type `A A B` in TextEdit or Notepad. The editor should keep focus while the three labels rise and disappear independently. See [TODO.md](TODO.md) for the test checklist.
+On Windows, use `./build/Release/key_balloons_tests.exe`. For a quick end-to-end check, type `A A B` in TextEdit or Notepad. The editor should keep focus while the three labels rise and disappear independently. See the [test checklist](TODO.en.md).

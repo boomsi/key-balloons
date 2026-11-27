@@ -1,10 +1,14 @@
+#include "app_preferences.h"
 #include "keyboard_monitor.h"
+#include "overlay_mouse_client.h"
+#include "overlay_placement.h"
 #include "tray_controls.h"
 
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QScreen>
+#include <QStandardPaths>
 #include <QTimer>
 #include <QtEnvironmentVariables>
 
@@ -91,6 +95,20 @@ void trackSettingsWorkArea(QQuickWindow &window)
     trackScreen(window.screen());
     QObject::connect(&window, &QWindow::screenChanged, &window, trackScreen);
 }
+
+#ifdef Q_OS_MACOS
+bool prepareNativeOverlay(QQuickWindow &window, AppPreferences &preferences)
+{
+    auto *flights = window.property("flightWindow").value<QQuickWindow *>();
+    if (!flights) {
+        qCritical("Key Balloons could not find the animation window.");
+        return false;
+    }
+    prepareMacOverlayGroup(window, *flights);
+    MacSettingsPopover::install(window, preferences);
+    return true;
+}
+#endif
 }
 
 int main(int argc, char *argv[])
@@ -116,18 +134,24 @@ int main(int argc, char *argv[])
 
     anchorOverlay(window, app);
     trackSettingsWorkArea(window);
+    OverlayPlacement placement(window);
+    MouseFeedbackServer feedback(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
+    const auto feedbackError = feedback.start();
+    if (feedbackError.isEmpty())
+        connectOverlayMouseFeedback(window, feedback.internalEndpoint(), feedback.internalToken());
+    else
+        qWarning().noquote() << feedbackError;
+
+    AppPreferences preferences(engine, placement, feedback);
+    window.setProperty("preferences", QVariant::fromValue<QObject *>(&preferences));
 #ifdef Q_OS_MACOS
-    auto *flights = window.property("flightWindow").value<QQuickWindow *>();
-    if (!flights) {
-        qCritical("Key Balloons could not find the animation window.");
+    if (!prepareNativeOverlay(window, preferences))
         return EXIT_FAILURE;
-    }
-    prepareMacOverlayGroup(window, *flights);
-    MacSettingsPopover::install(window);
 #endif
-    window.show();
+
     auto monitor = makeKeyboardMonitor();
-    TrayControls tray(*monitor, window);
+    TrayControls tray(*monitor, window, preferences, feedback);
+    window.show();
     tray.start();
     return app.exec();
 }

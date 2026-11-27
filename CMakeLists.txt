@@ -5,15 +5,26 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Qt6 6.10 REQUIRED COMPONENTS Quick Widgets)
+find_package(Qt6 6.10 REQUIRED COMPONENTS LinguistTools Network Quick Widgets)
 qt_standard_project_setup(REQUIRES 6.10)
+
+set(basic_box_dir examples/basic-box)
+set(basic_box_client_sources
+  ${basic_box_dir}/overlay_mouse_client.cpp
+  ${basic_box_dir}/overlay_mouse_client.h)
 
 qt_add_executable(key_balloons WIN32 MACOSX_BUNDLE
   src/main.cpp
+  src/app_preferences.cpp src/app_preferences.h
   src/keyboard_monitor.h
+  src/mouse_feedback.cpp src/mouse_feedback.h
+  ${basic_box_client_sources}
+  src/overlay_placement.cpp src/overlay_placement.h
+  src/process_memory.cpp src/process_memory.h
   src/tray_controls.cpp
   src/tray_controls.h)
-target_link_libraries(key_balloons PRIVATE Qt6::Quick Qt6::Widgets)
+target_include_directories(key_balloons PRIVATE src ${basic_box_dir})
+target_link_libraries(key_balloons PRIVATE Qt6::Network Qt6::Quick Qt6::Widgets)
 set_target_properties(key_balloons PROPERTIES OUTPUT_NAME KeyBalloons)
 
 if(APPLE)
@@ -57,7 +68,11 @@ else()
   message(FATAL_ERROR "Key Balloons supports macOS and Windows.")
 endif()
 
-set(qml_sources qml/Main.qml qml/BalloonField.qml qml/GlassBox.qml qml/KeyBalloon.qml)
+set(qml_sources
+  ${basic_box_dir}/Main.qml
+  ${basic_box_dir}/BalloonField.qml
+  ${basic_box_dir}/GlassBox.qml
+  ${basic_box_dir}/KeyBalloon.qml)
 foreach(source IN LISTS qml_sources)
   get_filename_component(file_name "${source}" NAME)
   set_source_files_properties("${source}" PROPERTIES QT_RESOURCE_ALIAS "${file_name}")
@@ -101,8 +116,21 @@ endif()
 include(CPack)
 
 include(CTest)
+set(translation_targets key_balloons)
 if(BUILD_TESTING)
-  find_package(Qt6 6.10 REQUIRED COMPONENTS QuickTest)
+  find_package(Qt6 6.10 REQUIRED COMPONENTS QuickTest Test)
+  qt_add_executable(key_balloons_core_tests tests/tst_overlay_core.cpp
+    src/mouse_feedback.cpp src/mouse_feedback.h
+    ${basic_box_client_sources}
+    src/overlay_placement.cpp src/overlay_placement.h
+    src/process_memory.cpp src/process_memory.h)
+  target_include_directories(key_balloons_core_tests PRIVATE src ${basic_box_dir})
+  target_link_libraries(key_balloons_core_tests PRIVATE Qt6::Network Qt6::Quick Qt6::Test)
+  if(MSVC)
+    target_compile_options(key_balloons_core_tests PRIVATE /utf-8)
+  endif()
+  add_test(NAME key_balloons_core COMMAND key_balloons_core_tests)
+  list(APPEND translation_targets key_balloons_core_tests)
   qt_add_executable(key_balloons_tests tests/quick_test.cpp)
   target_link_libraries(key_balloons_tests PRIVATE Qt6::QuickTest Qt6::Quick)
   add_test(NAME key_balloons_qml COMMAND key_balloons_tests
@@ -112,3 +140,15 @@ if(BUILD_TESTING)
   set_tests_properties(key_balloons_qml PROPERTIES ENVIRONMENT
     "QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
 endif()
+
+set(translation_catalogs
+  keyballoons_zh_CN.ts keyballoons_zh_TW.ts keyballoons_fr.ts
+  keyballoons_ja.ts keyballoons_ko.ts keyballoons_es.ts)
+list(TRANSFORM translation_catalogs PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/translations/")
+qt_add_translations(TARGETS ${translation_targets} SOURCE_TARGETS key_balloons
+  SOURCES src/macos/input_monitoring_guide.mm src/macos/keyboard_monitor.cpp src/windows/keyboard_monitor.cpp
+  TS_FILES ${translation_catalogs}
+  RESOURCE_PREFIX /translations
+  NO_GENERATE_PLURALS_TS_FILE
+  LUPDATE_OPTIONS -locations none
+  LRELEASE_OPTIONS -fail-on-unfinished)

@@ -1,5 +1,7 @@
 #include "input_monitoring_guide.h"
 
+#include <QCoreApplication>
+
 #include <QElapsedTimer>
 #include <QGuiApplication>
 #include <QScreen>
@@ -132,6 +134,9 @@ QRect inputMonitoringGuideFrame(QRect settings, QRect workArea, QSize size)
 @end
 
 namespace {
+constexpr NSInteger headingTag = 1;
+constexpr NSInteger hintTag = 2;
+
 NSTextField *guideLabel(NSString *text, NSRect frame)
 {
     auto *label = [NSTextField labelWithString:text];
@@ -146,7 +151,6 @@ NSPanel *makeGuidePanel(KeyBalloonsPermissionTile **tile)
     const auto style = NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel;
     auto *panel = [[NSPanel alloc] initWithContentRect:frame styleMask:style
                                              backing:NSBackingStoreBuffered defer:NO];
-    panel.title = @"Key Balloons — Input Monitoring";
     panel.floatingPanel = YES;
     panel.level = NSFloatingWindowLevel;
     panel.hidesOnDeactivate = NO;
@@ -166,8 +170,8 @@ NSPanel *makeGuidePanel(KeyBalloonsPermissionTile **tile)
         return YES;
     }];
 
-    auto *heading = guideLabel(NSLocalizedString(@"Drag into Input Monitoring", nil),
-                               NSMakeRect(12, 83, 266, 17));
+    auto *heading = guideLabel(@"", NSMakeRect(12, 83, 266, 17));
+    heading.tag = headingTag;
     heading.font = [NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];
     [background addSubview:heading];
 
@@ -175,8 +179,8 @@ NSPanel *makeGuidePanel(KeyBalloonsPermissionTile **tile)
                                                    bundleURL:NSBundle.mainBundle.bundleURL];
     [background addSubview:*tile];
 
-    auto *hint = guideLabel(NSLocalizedString(@"Remove an old entry before adding again.", nil),
-                            NSMakeRect(8, 9, 274, 15));
+    auto *hint = guideLabel(@"", NSMakeRect(8, 9, 274, 15));
+    hint.tag = hintTag;
     hint.font = [NSFont systemFontOfSize:10];
     hint.textColor = NSColor.secondaryLabelColor;
     [background addSubview:hint];
@@ -216,12 +220,23 @@ InputMonitoringGuide::InputMonitoringGuide(std::function<bool()> authorized,
     KeyBalloonsPermissionTile *tile = nil;
     native_->panel = makeGuidePanel(&tile);
     native_->tile = tile;
+    retranslate();
     QObject::connect(&native_->timer, &QTimer::timeout, [this] { refresh(); });
 }
 
 InputMonitoringGuide::~InputMonitoringGuide()
 {
     native_->dismiss();
+}
+
+void InputMonitoringGuide::retranslate()
+{
+    native_->panel.title = QCoreApplication::translate("InputMonitoringGuide", "Key Balloons — Input Monitoring").toNSString();
+    auto *content = native_->panel.contentView;
+    auto *heading = static_cast<NSTextField *>([content viewWithTag:headingTag]);
+    auto *hint = static_cast<NSTextField *>([content viewWithTag:hintTag]);
+    heading.stringValue = QCoreApplication::translate("InputMonitoringGuide", "Drag into Input Monitoring").toNSString();
+    hint.stringValue = QCoreApplication::translate("InputMonitoringGuide", "Remove an old entry before adding again.").toNSString();
 }
 
 bool InputMonitoringGuide::open()

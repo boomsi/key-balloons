@@ -1,6 +1,6 @@
 # Key Balloons
 
-[English](README.md)
+[English](README.md) · [简体中文](README.zh.md) · [繁體中文](README.zh-TW.md) · [Français](README.fr.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md)
 
 <img src="assets/KeyBalloons.svg" alt="Key Balloons 应用图标" width="112">
 
@@ -26,16 +26,19 @@ Key Balloons 是一个 macOS 和 Windows 的桌面小工具。在任何应用里
 ## 使用
 
 - 切到常用应用直接打字。盒子保持置顶，每次实际按键都显示一个字符。
-- 左键按住盒子可以移动。右键在盒子侧边打开设置，用 **Allow dragging** 开关锁定或解锁位置。
-- 用 **Opacity** 在 **20%–100%** 之间同时调节盒子和字符的透明度。
-- 切到其他应用时，设置菜单会自动收起。从 macOS 菜单栏或 Windows 通知区域的图标可以暂停监听或退出。
+- 右键盒子，或从菜单栏、通知区域选择 **Settings…（设置…）**，都会打开同一个面板。
+- 在 **外观** 调整 **大小**（50%–150%）和 **不透明度**（20%–100%），同时作用于盒子和浮动字符。
+- 在 **位置** 开启 **允许拖动** 后，可以按住左键移动盒子。勾选 **自动贴底**，松手时会吸附到最近屏幕的可用区域底边。
+- **语言** 可以即时切换，选择会保存。首次使用默认为英文。
+- 左键、右键、滚动或按下滚轮对应点亮左侧、右侧和中间。在 **高级** 开启本机鼠标接入，即可[发送或订阅鼠标反馈事件](docs/mouse-feedback.zh.md)。
+- 菜单栏或通知区域显示应用当前内存占用和监听状态，也可以暂停、恢复监听或退出。
 
-使用 Xcode 26 或更新版本构建时，macOS 26 上的右键设置会用系统 Liquid Glass 弹出面板、原生开关和滑块。
+使用 Xcode 26 或更新版本构建时，macOS 26 上的设置使用系统 Liquid Glass 弹出面板和原生控件。
 在 macOS 上切换桌面时，盒子会留在原位置，动画跟着盒子一起显示。
 
 ## 从源码构建
 
-需要 CMake 3.21 或更新版本、含 Qt Quick 和 Qt Quick Test 的 Qt 6.10 桌面 SDK，以及 Xcode 或 Visual Studio 2022 的 C++ 工具链。以下示例使用 Qt 6.10.3。
+需要 CMake 3.21 或更新版本、含 Qt Quick、Qt Quick Test 和 Qt Linguist 工具的 Qt 6.10 桌面 SDK，以及 Xcode 或 Visual Studio 2022 的 C++ 工具链。以下示例使用 Qt 6.10.3。
 
 **macOS**
 
@@ -67,9 +70,9 @@ macOS 包内的应用使用临时签名。Apple 公证和 Windows 发行签名�
 
 ## 项目结构和测试
 
-- `qml/` 包含共用的悬浮窗口和动画。
+- [`examples/basic-box/`](examples/basic-box/) 包含内置盒子示例、动画和鼠标反馈订阅代码。
 - `src/macos/` 和 `src/windows/` 分别处理各平台的键盘事件。macOS 模块还负责原生设置菜单和输入监控引导。
-- `tests/tst_balloons.qml` 覆盖快速连敲、独立到期、拖动锁定、失焦收起和透明度。
+- `tests/tst_balloons.qml` 覆盖快速连敲、独立到期、拖动、鼠标反馈和设置。`tests/tst_overlay_core.cpp` 覆盖屏幕定位、本机接入、翻译和内存读取。
 - `tests/tst_stress.qml` 模拟每秒 20 次输入、持续 30 秒，输出帧间隔与字符创建到下一 Qt 帧的第 95 百分位。真实按键到显示的总延迟需要另行实测。
 
 在桌面上可以运行持续动画测试。

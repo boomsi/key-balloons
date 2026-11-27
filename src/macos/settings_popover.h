@@ -5,20 +5,21 @@
 #include <memory>
 
 class QQuickWindow;
+class AppPreferences;
 
 class MacSettingsPopover final : public QObject
 {
     Q_OBJECT
 
 public:
-    static void install(QQuickWindow &overlay);
+    static void install(QQuickWindow &overlay, AppPreferences &preferences);
     ~MacSettingsPopover() override;
 
 private slots:
-    void toggle();
+    void show();
 
 private:
-    explicit MacSettingsPopover(QQuickWindow &overlay);
+    MacSettingsPopover(QQuickWindow &overlay, AppPreferences &preferences);
 
     struct Native;
     QQuickWindow &overlay_;

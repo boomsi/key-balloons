@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../qml" as Ui
+import "../examples/basic-box" as Ui
 
 TestCase {
     id: testCase
@@ -22,6 +22,9 @@ TestCase {
         id: overlayComponent
         Ui.Main {
             property int moveRequests: 0
+            property int snapRequests: 0
+
+            onSnapToBottomRequested: snapRequests++
 
             function startSystemMove() {
                 moveRequests++
@@ -35,6 +38,50 @@ TestCase {
             width: 120
             height: 80
         }
+    }
+
+    Component {
+        id: preferencesComponent
+        QtObject {
+            property bool autoSnapToBottom: false
+            property bool integrationsEnabled: false
+            readonly property bool integrationsAvailable: true
+            property string language: "en"
+            readonly property var languages: [
+                { code: "en", label: "English" }, { code: "ja", label: "日本語" }
+            ]
+        }
+    }
+
+    function test_settingsEntriesSharePreferences() {
+        const preferences = createTemporaryObject(preferencesComponent, null)
+        const overlay = createTemporaryObject(overlayComponent, null, { visible: true, preferences })
+        verify(overlay)
+        const box = findChild(overlay, "boxInput")
+        const menu = findChild(overlay, "boxMenu")
+        const snap = findChild(overlay, "snapSwitch")
+        const language = findChild(overlay, "languageCombo")
+        const advanced = findChild(overlay, "advancedButton")
+        const integrations = findChild(overlay, "integrationsSwitch")
+        verify(snap && language && advanced && integrations)
+
+        overlay.showSettings()
+        tryCompare(menu, "visible", true)
+        compare(language.currentValue, "en")
+        compare(integrations.visible, false)
+        mouseClick(snap)
+        compare(preferences.autoSnapToBottom, true)
+        mouseClick(advanced)
+        tryCompare(integrations, "visible", true)
+        mouseClick(integrations)
+        compare(preferences.integrationsEnabled, true)
+        menu.close()
+
+        preferences.language = "ja"
+        mouseClick(box, box.width / 2, box.height / 2, Qt.RightButton)
+        tryCompare(menu, "visible", true)
+        compare(language.currentValue, "ja")
+        compare(snap.checked, true)
     }
 
     function test_boxDragMenuLocksAndUnlocks() {
@@ -71,6 +118,62 @@ TestCase {
         menu.close()
         mouseClick(box)
         compare(overlay.moveRequests, 2)
+    }
+
+    function test_snapModeRequestsPlacementOnDragRelease() {
+        const overlay = createTemporaryObject(overlayComponent, null, {
+            x: 100, y: 100, visible: true, autoSnapToBottom: true
+        })
+        verify(overlay)
+        const box = findChild(overlay, "boxInput")
+        mousePress(box, 20, 10)
+        mouseMove(box, 60, 15)
+        compare(overlay.moveRequests, 0)
+        compare(overlay.snapRequests, 0)
+        mouseRelease(box, 20, 10)
+        compare(overlay.snapRequests, 1)
+        verify(overlay.x > 100)
+    }
+
+    function test_mouseFeedbackLightsOnlyTheRequestedRegion() {
+        const overlay = createTemporaryObject(overlayComponent, null, { visible: true })
+        verify(overlay)
+        const left = findChild(overlay, "leftMouseHighlight")
+        const right = findChild(overlay, "rightMouseHighlight")
+        const wheel = findChild(overlay, "wheelMouseHighlight")
+        verify(left && right && wheel)
+
+        const box = findChild(overlay, "boxInput")
+        const middle = box.width / 2
+        const highlights = [left, right, wheel]
+        const events = ["mouse.left", "mouse.right", "mouse.wheel"]
+        verify(left.x + left.width <= middle)
+        verify(right.x >= middle)
+        fuzzyCompare(wheel.x + wheel.width / 2, middle, 0.5)
+        verify(wheel.width < left.width)
+        for (let index = 0; index < events.length; index++) {
+            verify(highlights[index].height <= box.height / 3)
+            overlay.showMouseFeedback(events[index])
+            tryVerify(() => highlights[index].opacity > 0.3, 220)
+            for (let other = 0; other < highlights.length; other++) {
+                if (other !== index)
+                    compare(highlights[other].opacity, 0)
+            }
+            tryCompare(highlights[index], "opacity", 0, 650)
+        }
+    }
+
+    function test_mouseFeedbackCanRetriggerWithoutBlinking() {
+        const overlay = createTemporaryObject(overlayComponent, null, { visible: true })
+        verify(overlay)
+        const wheel = findChild(overlay, "wheelMouseHighlight")
+        verify(wheel)
+        overlay.showMouseFeedback("mouse.wheel")
+        tryVerify(() => wheel.opacity > 0.4, 220)
+        const brightness = wheel.opacity
+        overlay.showMouseFeedback("mouse.wheel")
+        verify(wheel.opacity >= brightness - 0.01)
+        tryCompare(wheel, "opacity", 0, 650)
     }
 
     function test_opacitySliderUpdatesBothWindows() {
@@ -166,11 +269,18 @@ TestCase {
         verify(menu.x + menu.width <= overlay.x, "Left popup x=" + menu.x + ", width=" + menu.width)
     }
 
-    function test_settingsCloseOnFocusLoss() {
+    function test_settingsCloseOnFocusLoss_data() {
+        return test_settingsFocusWindowAndCloseOnEscape_data()
+    }
+
+    function test_settingsCloseOnFocusLoss(data) {
         const overlay = createTemporaryObject(overlayComponent, null, { visible: true })
         const box = findChild(overlay, "boxInput")
         const menu = findChild(overlay, "boxMenu")
-        mouseClick(box, box.width / 2, box.height / 2, Qt.RightButton)
+        if (data.fromTray)
+            overlay.showSettings()
+        else
+            mouseClick(box, box.width / 2, box.height / 2, Qt.RightButton)
         tryCompare(menu, "visible", true)
         tryCompare(menu, "active", true)
 
@@ -181,13 +291,24 @@ TestCase {
         verify(overlay.visible)
     }
 
-    function test_settingsFocusFirstControlAndCloseOnEscape() {
+    function test_settingsFocusWindowAndCloseOnEscape_data() {
+        return [{ tag: "from-tray", fromTray: true }, { tag: "from-box", fromTray: false }]
+    }
+
+    function test_settingsFocusWindowAndCloseOnEscape(data) {
         const overlay = createTemporaryObject(overlayComponent, null, { visible: true })
         const box = findChild(overlay, "boxInput")
         const menu = findChild(overlay, "boxMenu")
         const dragSwitch = findChild(overlay, "draggingSwitch")
-        mouseClick(box, box.width / 2, box.height / 2, Qt.RightButton)
-        tryCompare(dragSwitch, "activeFocus", true)
+        if (data.fromTray)
+            overlay.showSettings()
+        else
+            mouseClick(box, box.width / 2, box.height / 2, Qt.RightButton)
+        tryCompare(menu, "active", true)
+        compare(dragSwitch.activeFocus, false)
+        compare(menu.activeFocusItem, findChild(overlay, "settingsPane"))
+        keyClick(Qt.Key_Space)
+        compare(overlay.allowDragging, true)
         keyClick(Qt.Key_Escape)
         tryCompare(menu, "visible", false)
     }

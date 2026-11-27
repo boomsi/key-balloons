@@ -15,6 +15,7 @@ public:
     ~InputMonitoringGuide();
 
     bool open();
+    void retranslate();
 
 private:
     void refresh();

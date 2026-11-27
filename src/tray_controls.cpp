@@ -1,9 +1,12 @@
 #include "tray_controls.h"
 
+#include "app_preferences.h"
 #include "keyboard_monitor.h"
+#include "process_memory.h"
 
 #include <QAction>
 #include <QCoreApplication>
+#include <QLocale>
 #include <QMessageBox>
 #include <QPainter>
 #include <QPushButton>
@@ -47,20 +50,37 @@ QIcon trayIcon()
 }
 }
 
-TrayControls::TrayControls(KeyboardMonitor &monitor, QQuickWindow &window)
+TrayControls::TrayControls(KeyboardMonitor &monitor, QQuickWindow &window, AppPreferences &preferences,
+                           MouseFeedbackServer &feedback)
     : monitor_(monitor),
       tray_(trayIcon()),
+      memory_(menu_.addAction(QString{})),
       status_(menu_.addAction(QString{})),
-      toggle_(menu_.addAction(QString{}))
+      toggle_(menu_.addAction(QString{})),
+      settings_(menu_.addAction(QString{})),
+      quit_(nullptr)
 {
+    memory_->setEnabled(false);
     status_->setEnabled(false);
     menu_.addSeparator();
-    menu_.addAction(QObject::tr("Quit Key Balloons"), qApp, &QCoreApplication::quit);
+    quit_ = menu_.addAction(QString{}, qApp, &QCoreApplication::quit);
+    QObject::connect(&menu_, &QMenu::aboutToShow, &tray_, [this] { refreshMemory(); });
+    QObject::connect(&preferences, &AppPreferences::languageChanged, &tray_, [this] {
+        statusDetail_.clear();
+        refreshMenuText();
+#ifdef Q_OS_MACOS
+        if (permissionGuide_)
+            permissionGuide_->retranslate();
+#endif
+    });
+    QObject::connect(settings_, &QAction::triggered, &window, [&window] {
+        QMetaObject::invokeMethod(&window, "showSettings", Qt::QueuedConnection);
+    });
     QObject::connect(toggle_, &QAction::triggered, &tray_, [this] {
         if (listening_) {
             listening_ = false;
             monitor_.stop();
-            setStatus(QObject::tr("Monitoring paused"));
+            setStatus(Status::Paused);
         } else {
             start(true);
         }
@@ -70,13 +90,18 @@ TrayControls::TrayControls(KeyboardMonitor &monitor, QQuickWindow &window)
         if (listening_ && !repeat)
             QMetaObject::invokeMethod(&window, "showKey", Q_ARG(QString, label));
     }, Qt::QueuedConnection);
+    QObject::connect(&monitor_, &KeyboardMonitor::mouseFeedback, &tray_, [this, &feedback](MouseFeedback event) {
+        if (listening_)
+            feedback.publish(event);
+    }, Qt::QueuedConnection);
     QObject::connect(&monitor_, &KeyboardMonitor::interrupted, &tray_, [this](const QString &reason) {
         listening_ = false;
         monitor_.stop();
-        setStatus(reason);
+        setStatus(Status::Unavailable, reason);
     }, Qt::QueuedConnection);
 
     tray_.setContextMenu(&menu_);
+    refreshMenuText();
     tray_.show();
 }
 
@@ -100,12 +125,12 @@ void TrayControls::start()
 #ifdef Q_OS_MACOS
 void TrayControls::showStartupPermissionPrompt()
 {
-    auto *prompt = new QMessageBox(QMessageBox::Information, QObject::tr("Key Balloons"),
-        QObject::tr("Enable Input Monitoring to show the keys you press. "
+    auto *prompt = new QMessageBox(QMessageBox::Information, tr("Key Balloons"),
+        tr("Enable Input Monitoring to show keyboard and mouse input. "
                     "The next step opens System Settings and shows you where to drag Key Balloons."));
     prompt->setAttribute(Qt::WA_DeleteOnClose);
-    auto *open = prompt->addButton(QObject::tr("Open Input Monitoring"), QMessageBox::AcceptRole);
-    auto *dismiss = prompt->addButton(QObject::tr("Not Now"), QMessageBox::RejectRole);
+    auto *open = prompt->addButton(tr("Open Input Monitoring"), QMessageBox::AcceptRole);
+    auto *dismiss = prompt->addButton(tr("Not Now"), QMessageBox::RejectRole);
     prompt->setDefaultButton(open);
     prompt->setEscapeButton(dismiss);
     QObject::connect(prompt, &QMessageBox::finished, &tray_, [this, prompt, open] {
@@ -125,8 +150,8 @@ void TrayControls::start(bool requestPermission)
                 hasMacInputMonitoringPermission, [this] { start(false); });
         }
         if (!permissionGuide_->open()) {
-            QMessageBox::warning(nullptr, QObject::tr("Could not open Input Monitoring"),
-                QObject::tr("Open System Settings, go to Privacy & Security → Input Monitoring, "
+            QMessageBox::warning(nullptr, tr("Could not open Input Monitoring"),
+                tr("Open System Settings, go to Privacy & Security → Input Monitoring, "
                             "then add Key Balloons and turn on its switch."));
         }
         return;
@@ -134,25 +159,53 @@ void TrayControls::start(bool requestPermission)
 #endif
     const auto error = monitor_.start(false);
     listening_ = error.isEmpty();
-    auto status = listening_ ? QObject::tr("Monitoring keyboard") : QObject::tr("Monitoring unavailable");
+    auto status = listening_ ? Status::Running : Status::Unavailable;
 #ifdef Q_OS_MACOS
     if (!listening_ && !hasMacInputMonitoringPermission())
-        status = QObject::tr("Input Monitoring required");
+        status = Status::PermissionRequired;
 #endif
-    setStatus(status);
-    if (!listening_) {
-        tray_.setToolTip(error);
-        if (requestPermission)
-            QMessageBox::information(nullptr, QObject::tr("Key Balloons"), error);
-    }
+    setStatus(status, error);
+    if (!listening_ && requestPermission)
+        QMessageBox::information(nullptr, tr("Key Balloons"), error);
 }
 
 TrayControls::~TrayControls() = default;
 
-void TrayControls::setStatus(const QString &summary)
+void TrayControls::setStatus(Status status, const QString &detail)
 {
+    currentStatus_ = status;
+    statusDetail_ = detail;
+    refreshMenuText();
+}
+
+QString TrayControls::statusText() const
+{
+    switch (currentStatus_) {
+    case Status::Paused: return tr("Monitoring paused");
+    case Status::Running: return tr("Monitoring keyboard and mouse");
+    case Status::Unavailable: return tr("Monitoring unavailable");
+    case Status::PermissionRequired: return tr("Input Monitoring required");
+    }
+    return {};
+}
+
+void TrayControls::refreshMenuText()
+{
+    const auto summary = statusText();
     status_->setText(summary);
-    toggle_->setText(listening_ ? QObject::tr("Pause monitoring")
-                               : QObject::tr("Enable monitoring…"));
-    tray_.setToolTip(QObject::tr("Key Balloons · %1").arg(summary));
+    toggle_->setText(listening_ ? tr("Pause monitoring") : tr("Enable monitoring…"));
+    settings_->setText(tr("Settings…"));
+    quit_->setText(tr("Quit Key Balloons"));
+    tray_.setToolTip(statusDetail_.isEmpty() ? tr("Key Balloons · %1").arg(summary) : statusDetail_);
+    refreshMemory();
+}
+
+void TrayControls::refreshMemory()
+{
+    const auto bytes = currentProcessMemoryBytes();
+    memory_->setVisible(bytes.has_value());
+    if (bytes) {
+        const double mebibytes = *bytes / (1024.0 * 1024.0);
+        memory_->setText(tr("Memory %1 MiB").arg(QLocale().toString(mebibytes, 'f', 1)));
+    }
 }

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtTest
-import "../qml" as Ui
+import "../examples/basic-box" as Ui
 
 TestCase {
     id: testCase

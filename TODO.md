@@ -1,5 +1,7 @@
 # Key Balloons
 
+[English](TODO.en.md) · [简体中文](TODO.md) · [繁體中文](TODO.zh-TW.md) · [Français](TODO.fr.md) · [日本語](TODO.ja.md) · [한국어](TODO.ko.md) · [Español](TODO.es.md)
+
 ## 第一版
 
 - [x] 确定共用 C++ 和 Qt Quick，平台代码只处理系统事件和窗口行为。

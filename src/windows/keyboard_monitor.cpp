@@ -14,6 +14,7 @@ namespace {
 constexpr wchar_t receiverClass[] = L"KeyBalloons.RawKeyboardReceiver";
 constexpr USHORT genericDesktopUsagePage = 0x01;
 constexpr USHORT keyboardUsage = 0x06;
+constexpr USHORT mouseUsage = 0x02;
 
 QString namedKey(USHORT key)
 {
@@ -74,6 +75,8 @@ QString windowsError(const QString &message, DWORD code)
 
 class WindowsKeyboardMonitor final : public KeyboardMonitor
 {
+    Q_DECLARE_TR_FUNCTIONS(WindowsKeyboardMonitor)
+
 public:
     ~WindowsKeyboardMonitor() override { stop(); }
 
@@ -98,13 +101,14 @@ public:
             return windowsError(tr("Could not create the keyboard receiver"), error);
         }
 
-        const RAWINPUTDEVICE registration{
-            genericDesktopUsagePage, keyboardUsage, RIDEV_INPUTSINK | RIDEV_DEVNOTIFY, receiver_,
+        const RAWINPUTDEVICE registration[]{
+            {genericDesktopUsagePage, keyboardUsage, RIDEV_INPUTSINK | RIDEV_DEVNOTIFY, receiver_},
+            {genericDesktopUsagePage, mouseUsage, RIDEV_INPUTSINK, receiver_},
         };
-        if (!RegisterRawInputDevices(&registration, 1, sizeof(registration))) {
+        if (!RegisterRawInputDevices(registration, 2, sizeof(RAWINPUTDEVICE))) {
             const auto error = GetLastError();
             stop();
-            return windowsError(tr("Could not start global keyboard monitoring"), error);
+            return windowsError(tr("Could not start global input monitoring"), error);
         }
         registered_ = true;
         return {};
@@ -116,9 +120,12 @@ public:
             return;
 
         if (registered_) {
-            const RAWINPUTDEVICE removal{genericDesktopUsagePage, keyboardUsage, RIDEV_REMOVE, nullptr};
-            if (!RegisterRawInputDevices(&removal, 1, sizeof(removal)))
-                emit interrupted(windowsError(tr("Could not unregister the keyboard receiver"), GetLastError()));
+            const RAWINPUTDEVICE removal[]{
+                {genericDesktopUsagePage, keyboardUsage, RIDEV_REMOVE, nullptr},
+                {genericDesktopUsagePage, mouseUsage, RIDEV_REMOVE, nullptr},
+            };
+            if (!RegisterRawInputDevices(removal, 2, sizeof(RAWINPUTDEVICE)))
+                emit interrupted(windowsError(tr("Could not unregister the input receiver"), GetLastError()));
             registered_ = false;
         }
         DestroyWindow(receiver_);
@@ -150,18 +157,32 @@ private:
     {
         RAWINPUT input{};
         UINT size = sizeof(input);
-        if (GetRawInputData(message, RID_INPUT, &input, &size, sizeof(RAWINPUTHEADER)) == UINT(-1)
-            || input.header.dwType != RIM_TYPEKEYBOARD) {
+        if (GetRawInputData(message, RID_INPUT, &input, &size, sizeof(RAWINPUTHEADER)) == UINT(-1))
             return;
-        }
+        if (input.header.dwType == RIM_TYPEMOUSE)
+            readMouse(input.data.mouse.usButtonFlags);
+        else if (input.header.dwType == RIM_TYPEKEYBOARD)
+            readKeyboard(input.data.keyboard, input.header.hDevice);
+    }
 
-        const auto &key = input.data.keyboard;
+    void readMouse(USHORT flags)
+    {
+        if (flags & RI_MOUSE_LEFT_BUTTON_DOWN)
+            emit mouseFeedback(MouseFeedback::Left);
+        if (flags & RI_MOUSE_RIGHT_BUTTON_DOWN)
+            emit mouseFeedback(MouseFeedback::Right);
+        if (flags & (RI_MOUSE_MIDDLE_BUTTON_DOWN | RI_MOUSE_WHEEL | RI_MOUSE_HWHEEL))
+            emit mouseFeedback(MouseFeedback::Wheel);
+    }
+
+    void readKeyboard(const RAWKEYBOARD &key, HANDLE device)
+    {
         if (key.MakeCode == KEYBOARD_OVERRUN_MAKE_CODE || key.VKey >= 0xff)
             return;
 
         const auto scanCode = key.MakeCode == 0 ? key.VKey : key.MakeCode;
         const auto extended = key.Flags & (RI_KEY_E0 | RI_KEY_E1);
-        const KeyId id{reinterpret_cast<quintptr>(input.header.hDevice),
+        const KeyId id{reinterpret_cast<quintptr>(device),
                        (quint32(extended) << 16) | scanCode};
         if (key.Flags & RI_KEY_BREAK) {
             pressed_.erase(id);

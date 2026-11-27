@@ -96,6 +96,8 @@ QString layoutLabel(UInt16 key)
 
 class MacKeyboardMonitor final : public KeyboardMonitor
 {
+    Q_DECLARE_TR_FUNCTIONS(MacKeyboardMonitor)
+
 public:
     ~MacKeyboardMonitor() override { stop(); }
 
@@ -111,7 +113,9 @@ public:
                       "Input Monitoring, then retry or reopen the app.");
         }
 
-        const auto events = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged);
+        const auto events = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged)
+            | CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventRightMouseDown)
+            | CGEventMaskBit(kCGEventOtherMouseDown) | CGEventMaskBit(kCGEventScrollWheel);
         tap_ = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionListenOnly,
                                 events, readEvent, this);
         if (!tap_)
@@ -145,6 +149,32 @@ public:
     }
 
 private:
+    bool readMouseEvent(CGEventType type, CGEventRef event)
+    {
+        switch (type) {
+        case kCGEventLeftMouseDown:
+            emit mouseFeedback(MouseFeedback::Left);
+            return true;
+        case kCGEventRightMouseDown:
+            emit mouseFeedback(MouseFeedback::Right);
+            return true;
+        case kCGEventOtherMouseDown:
+            if (CGEventGetIntegerValueField(event, kCGMouseEventButtonNumber) == kCGMouseButtonCenter)
+                emit mouseFeedback(MouseFeedback::Wheel);
+            return true;
+        case kCGEventScrollWheel:
+            if (CGEventGetIntegerValueField(event, kCGScrollWheelEventPointDeltaAxis1)
+                || CGEventGetIntegerValueField(event, kCGScrollWheelEventPointDeltaAxis2)
+                || CGEventGetIntegerValueField(event, kCGScrollWheelEventDeltaAxis1)
+                || CGEventGetIntegerValueField(event, kCGScrollWheelEventDeltaAxis2)) {
+                emit mouseFeedback(MouseFeedback::Wheel);
+            }
+            return true;
+        default:
+            return false;
+        }
+    }
+
     static CGEventRef readEvent(CGEventTapProxy, CGEventType type, CGEventRef event, void *context)
     {
         auto &monitor = *static_cast<MacKeyboardMonitor *>(context);
@@ -155,6 +185,8 @@ private:
                 emit monitor.interrupted(tr("Keyboard monitoring permission was removed."));
             return event;
         }
+        if (monitor.readMouseEvent(type, event))
+            return event;
 
         const auto code = static_cast<UInt16>(
             CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode));
