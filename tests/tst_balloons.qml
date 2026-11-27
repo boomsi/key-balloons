@@ -111,6 +111,42 @@ TestCase {
         compare(flight.y - overlay.y, relativeY)
     }
 
+    function test_boxStartsAtHalfHeight() {
+        const overlay = createTemporaryObject(overlayComponent, null)
+        verify(overlay)
+        const box = findChild(overlay, "boxInput")
+        compare(box.width, 142)
+        compare(box.height, 30)
+        compare(overlay.height, 35)
+    }
+
+    function test_sizeSliderScalesBoxAndFlights() {
+        const overlay = createTemporaryObject(overlayComponent, null, { visible: true })
+        verify(overlay)
+        const box = findChild(overlay, "boxInput")
+        const menu = findChild(overlay, "boxMenu")
+        const slider = findChild(overlay, "sizeSlider")
+        const flight = overlay.flightWindow
+        verify(slider)
+
+        mouseClick(box, box.width / 2, box.height / 2, Qt.RightButton)
+        tryCompare(menu, "visible", true)
+        compare(slider.value, 100)
+        const start = slider.mapFromItem(slider.handle, slider.handle.width / 2,
+                                        slider.handle.height / 2)
+        mouseDrag(slider, start.x, start.y, slider.width / 2, 0)
+
+        const factor = slider.value / 100
+        verify(factor > 1)
+        compare(overlay.sizePercent, slider.value)
+        compare(overlay.width, Math.round(142 * factor))
+        compare(overlay.height, Math.round(35 * factor))
+        compare(flight.width, Math.round(360 * factor))
+        compare(flight.height, Math.round(265 * factor))
+        compare(flight.y + flight.height, Math.round(overlay.y + box.parent.mouthY * factor))
+        verify(menu.visible)
+    }
+
     function test_settingsOpenBesideBox() {
         const overlay = createTemporaryObject(overlayComponent, null, {
             x: 300, y: 300, visible: true, settingsWorkArea: Qt.rect(0, 0, 800, 600)

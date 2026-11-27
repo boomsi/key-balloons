@@ -4,7 +4,7 @@ Item {
     id: box
     required property bool dark
     implicitWidth: 142
-    implicitHeight: 60
+    implicitHeight: 30
     readonly property real mouthY: opening.y + opening.height / 2
 
     function pulse() {
@@ -14,16 +14,16 @@ Item {
 
     Rectangle {
         x: 6
-        y: 12
+        y: 5
         width: box.width - 12
-        height: box.height - 7
-        radius: 18
+        height: box.height - 2
+        radius: 11
         color: "#30081424"
     }
 
     Rectangle {
         anchors.fill: parent
-        radius: 19
+        radius: 12
         border.width: 1
         border.color: box.dark ? "#9dc2e4ff" : "#e3ffffff"
         gradient: Gradient {
@@ -36,8 +36,8 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        anchors.margins: 3
-        radius: 16
+        anchors.margins: 2
+        radius: 10
         color: "transparent"
         border.width: 1
         border.color: box.dark ? "#4aafc8e9" : "#83ffffff"
@@ -46,10 +46,10 @@ Item {
     Rectangle {
         id: opening
         x: 16
-        y: 9
+        y: 5
         width: box.width - 32
-        height: 19
-        radius: 10
+        height: 11
+        radius: 6
         border.width: 1
         border.color: box.dark ? "#81bbd9f7" : "#d5ffffff"
         gradient: Gradient {
@@ -61,9 +61,9 @@ Item {
     Rectangle {
         id: reflectedLight
         x: opening.x + 11
-        y: opening.y + opening.height - 3
+        y: opening.y + opening.height - 2
         width: opening.width - 22
-        height: 2
+        height: 1
         radius: 1
         color: box.dark ? "#a3e1ff" : "#f8feff"
         opacity: 0.25
@@ -82,7 +82,7 @@ Item {
         height: 2
         radius: 1
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 42
+        y: 22
         color: box.dark ? "#839ebcdb" : "#b26180aa"
     }
 }

@@ -7,18 +7,29 @@ Window {
     id: overlay
     property bool allowDragging: true
     property int opacityPercent: 100
+    property int sizePercent: 100
+    readonly property int minimumSizePercent: 50
+    readonly property int maximumSizePercent: 150
+    readonly property real sizeFactor: sizePercent / 100
     property bool nativeSettingsEnabled: false
     property rect settingsWorkArea: Qt.rect(Screen.virtualX, Screen.virtualY,
                                             Screen.width, Screen.height)
     readonly property alias flightWindow: flights
     signal nativeSettingsRequested()
 
-    width: glass.implicitWidth
-    height: glass.implicitHeight + 5
+    width: Math.round(glass.implicitWidth * sizeFactor)
+    height: Math.round((glass.implicitHeight + 5) * sizeFactor)
     color: "transparent"
     opacity: opacityPercent / 100
     title: qsTr("Key Balloons")
     flags: Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus
+    onSizePercentChanged: Qt.callLater(keepBoxOnScreen)
+
+    function keepBoxOnScreen() {
+        const area = settingsWorkArea
+        x = Math.max(area.x, Math.min(x, area.x + area.width - width))
+        y = Math.max(area.y, Math.min(y, area.y + area.height - height))
+    }
 
     function showKey(label: string) {
         field.spawn(label)
@@ -60,6 +71,8 @@ Window {
         id: glass
         width: implicitWidth
         height: implicitHeight
+        scale: overlay.sizeFactor
+        transformOrigin: Item.TopLeft
         dark: field.dark
 
         MouseArea {
@@ -129,6 +142,30 @@ Window {
                     snapMode: Slider.SnapAlways
                     onMoved: overlay.opacityPercent = Math.round(value)
                 }
+
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    Label {
+                        text: qsTr("Size")
+                        Layout.fillWidth: true
+                    }
+                    Label {
+                        text: qsTr("%1%").arg(overlay.sizePercent)
+                    }
+                }
+
+                Slider {
+                    objectName: "sizeSlider"
+                    Accessible.name: qsTr("Size")
+                    Layout.fillWidth: true
+                    from: overlay.minimumSizePercent
+                    to: overlay.maximumSizePercent
+                    value: overlay.sizePercent
+                    stepSize: 1
+                    snapMode: Slider.SnapAlways
+                    onMoved: overlay.sizePercent = Math.round(value)
+                }
             }
         }
     }
@@ -136,10 +173,10 @@ Window {
     Window {
         id: flights
         transientParent: overlay
-        width: 360
-        height: 265
-        x: overlay.x + (overlay.width - width) / 2
-        y: Math.round(overlay.y + glass.mouthY - height)
+        width: Math.round(field.width * overlay.sizeFactor)
+        height: Math.round(field.height * overlay.sizeFactor)
+        x: Math.round(overlay.x + (overlay.width - width) / 2)
+        y: Math.round(overlay.y + glass.mouthY * overlay.sizeFactor - height)
         color: "transparent"
         opacity: overlay.opacity
         flags: overlay.flags | Qt.WindowTransparentForInput
@@ -147,7 +184,12 @@ Window {
 
         BalloonField {
             id: field
-            anchors.fill: parent
+            width: 360
+            height: 265
+            x: (parent.width - width) / 2
+            y: parent.height - height
+            scale: overlay.sizeFactor
+            transformOrigin: Item.Bottom
         }
     }
 }

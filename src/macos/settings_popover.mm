@@ -8,7 +8,7 @@
 #include <cmath>
 
 namespace {
-constexpr NSSize settingsSize = {224, 110};
+constexpr NSSize settingsSize = {224, 158};
 
 NSStackView *settingsRow(NSView *label, NSView *control)
 {
@@ -18,6 +18,13 @@ NSStackView *settingsRow(NSView *label, NSView *control)
     [row addView:label inGravity:NSStackViewGravityLeading];
     [row addView:control inGravity:NSStackViewGravityTrailing];
     return row;
+}
+
+NSTextField *percentageLabel()
+{
+    auto *label = [NSTextField labelWithString:@"100%"];
+    label.font = [NSFont monospacedDigitSystemFontOfSize:NSFont.systemFontSize weight:NSFontWeightRegular];
+    return label;
 }
 }
 
@@ -30,7 +37,9 @@ NSStackView *settingsRow(NSView *label, NSView *control)
     QPointer<QQuickWindow> overlay_;
     NSSwitch *dragging_;
     NSSlider *opacity_;
-    NSTextField *percentage_;
+    NSTextField *opacityPercentage_;
+    NSSlider *size_;
+    NSTextField *sizePercentage_;
 }
 
 - (instancetype)initWithOverlay:(QQuickWindow *)overlay
@@ -56,14 +65,22 @@ NSStackView *settingsRow(NSView *label, NSView *control)
     opacity_.continuous = YES;
     [opacity_ setAccessibilityLabel:NSLocalizedString(@"Opacity", nil)];
 
-    percentage_ = [NSTextField labelWithString:@"100%"];
-    percentage_.font = [NSFont monospacedDigitSystemFontOfSize:NSFont.systemFontSize weight:NSFontWeightRegular];
+    opacityPercentage_ = percentageLabel();
+
+    size_ = [NSSlider sliderWithValue:100 minValue:overlay_->property("minimumSizePercent").toInt()
+                             maxValue:overlay_->property("maximumSizePercent").toInt()
+                               target:self action:@selector(changeSize:)];
+    size_.continuous = YES;
+    [size_ setAccessibilityLabel:NSLocalizedString(@"Size", nil)];
+    sizePercentage_ = percentageLabel();
 
     auto *draggingRow = settingsRow([NSTextField labelWithString:NSLocalizedString(@"Allow dragging", nil)],
                                    dragging_);
     auto *opacityRow = settingsRow([NSTextField labelWithString:NSLocalizedString(@"Opacity", nil)],
-                                   percentage_);
-    auto *stack = [NSStackView stackViewWithViews:@[draggingRow, opacityRow, opacity_]];
+                                   opacityPercentage_);
+    auto *sizeRow = settingsRow([NSTextField labelWithString:NSLocalizedString(@"Size", nil)],
+                                sizePercentage_);
+    auto *stack = [NSStackView stackViewWithViews:@[draggingRow, opacityRow, opacity_, sizeRow, size_]];
     stack.orientation = NSUserInterfaceLayoutOrientationVertical;
     stack.alignment = NSLayoutAttributeLeading;
     stack.spacing = 8;
@@ -76,6 +93,8 @@ NSStackView *settingsRow(NSView *label, NSView *control)
         [draggingRow.widthAnchor constraintEqualToAnchor:stack.widthAnchor],
         [opacityRow.widthAnchor constraintEqualToAnchor:stack.widthAnchor],
         [opacity_.widthAnchor constraintEqualToAnchor:stack.widthAnchor],
+        [sizeRow.widthAnchor constraintEqualToAnchor:stack.widthAnchor],
+        [size_.widthAnchor constraintEqualToAnchor:stack.widthAnchor],
     ]];
 }
 
@@ -92,9 +111,12 @@ NSStackView *settingsRow(NSView *label, NSView *control)
     (void)self.view;
     dragging_.state = overlay_->property("allowDragging").toBool() ? NSControlStateValueOn
                                                                   : NSControlStateValueOff;
-    const auto percent = overlay_->property("opacityPercent").toInt();
-    opacity_.integerValue = percent;
-    percentage_.stringValue = [NSString stringWithFormat:@"%d%%", percent];
+    const auto opacityPercent = overlay_->property("opacityPercent").toInt();
+    opacity_.integerValue = opacityPercent;
+    opacityPercentage_.stringValue = [NSString stringWithFormat:@"%d%%", opacityPercent];
+    const auto sizePercent = overlay_->property("sizePercent").toInt();
+    size_.integerValue = sizePercent;
+    sizePercentage_.stringValue = [NSString stringWithFormat:@"%d%%", sizePercent];
 }
 
 - (void)changeDragging:(NSSwitch *)sender
@@ -108,7 +130,15 @@ NSStackView *settingsRow(NSView *label, NSView *control)
     const auto percent = static_cast<int>(std::lround(sender.doubleValue));
     if (overlay_)
         overlay_->setProperty("opacityPercent", percent);
-    percentage_.stringValue = [NSString stringWithFormat:@"%d%%", percent];
+    opacityPercentage_.stringValue = [NSString stringWithFormat:@"%d%%", percent];
+}
+
+- (void)changeSize:(NSSlider *)sender
+{
+    const auto percent = static_cast<int>(std::lround(sender.doubleValue));
+    if (overlay_)
+        overlay_->setProperty("sizePercent", percent);
+    sizePercentage_.stringValue = [NSString stringWithFormat:@"%d%%", percent];
 }
 
 @end
