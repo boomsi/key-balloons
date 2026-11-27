@@ -17,7 +17,7 @@ Download the installer for your platform from [GitHub Releases](https://github.c
 
 ### Allow Input Monitoring on macOS
 
-1. Open the Key Balloons menu bar menu and choose **Enable monitoring…**.
+1. If Key Balloons needs permission at startup, choose **Open Input Monitoring** in the prompt. You can also choose **Enable monitoring…** from the menu bar later.
 2. System Settings opens to **Privacy & Security → Input Monitoring**. Drag the **Key Balloons** icon from the card below the window into the list.
 3. Turn on the switch in System Settings. The card closes once Key Balloons detects permission. If macOS asks you to quit and reopen the app, follow that prompt.
 

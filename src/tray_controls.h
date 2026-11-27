@@ -16,9 +16,13 @@ class TrayControls
 public:
     TrayControls(KeyboardMonitor &monitor, QQuickWindow &window);
     ~TrayControls();
-    void start(bool requestPermission);
+    void start();
 
 private:
+    void start(bool requestPermission);
+#ifdef Q_OS_MACOS
+    void showStartupPermissionPrompt();
+#endif
     void setStatus(const QString &summary);
 
     KeyboardMonitor &monitor_;

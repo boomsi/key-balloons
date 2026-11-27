@@ -6,7 +6,9 @@
 #include <QCoreApplication>
 #include <QMessageBox>
 #include <QPainter>
+#include <QPushButton>
 #include <QQuickWindow>
+#include <QTimer>
 
 #ifdef Q_OS_MACOS
 #include "macos/input_monitoring_guide.h"
@@ -78,6 +80,42 @@ TrayControls::TrayControls(KeyboardMonitor &monitor, QQuickWindow &window)
     tray_.show();
 }
 
+void TrayControls::start()
+{
+    start(false);
+#ifdef Q_OS_MACOS
+    if (!listening_ && !hasMacInputMonitoringPermission()) {
+        QTimer::singleShot(0, &tray_, [this] {
+            if (listening_)
+                return;
+            if (hasMacInputMonitoringPermission())
+                start(false);
+            else
+                showStartupPermissionPrompt();
+        });
+    }
+#endif
+}
+
+#ifdef Q_OS_MACOS
+void TrayControls::showStartupPermissionPrompt()
+{
+    auto *prompt = new QMessageBox(QMessageBox::Information, QObject::tr("Key Balloons"),
+        QObject::tr("Enable Input Monitoring to show the keys you press. "
+                    "The next step opens System Settings and shows you where to drag Key Balloons."));
+    prompt->setAttribute(Qt::WA_DeleteOnClose);
+    auto *open = prompt->addButton(QObject::tr("Open Input Monitoring"), QMessageBox::AcceptRole);
+    auto *dismiss = prompt->addButton(QObject::tr("Not Now"), QMessageBox::RejectRole);
+    prompt->setDefaultButton(open);
+    prompt->setEscapeButton(dismiss);
+    QObject::connect(prompt, &QMessageBox::finished, &tray_, [this, prompt, open] {
+        if (prompt->clickedButton() == open)
+            QTimer::singleShot(0, &tray_, [this] { start(true); });
+    });
+    prompt->open();
+}
+#endif
+
 void TrayControls::start(bool requestPermission)
 {
 #ifdef Q_OS_MACOS
@@ -86,13 +124,22 @@ void TrayControls::start(bool requestPermission)
             permissionGuide_ = std::make_unique<InputMonitoringGuide>(
                 hasMacInputMonitoringPermission, [this] { start(false); });
         }
-        if (permissionGuide_->open())
-            return;
+        if (!permissionGuide_->open()) {
+            QMessageBox::warning(nullptr, QObject::tr("Could not open Input Monitoring"),
+                QObject::tr("Open System Settings, go to Privacy & Security → Input Monitoring, "
+                            "then add Key Balloons and turn on its switch."));
+        }
+        return;
     }
 #endif
-    const auto error = monitor_.start(requestPermission);
+    const auto error = monitor_.start(false);
     listening_ = error.isEmpty();
-    setStatus(listening_ ? QObject::tr("Monitoring keyboard") : QObject::tr("Monitoring unavailable"));
+    auto status = listening_ ? QObject::tr("Monitoring keyboard") : QObject::tr("Monitoring unavailable");
+#ifdef Q_OS_MACOS
+    if (!listening_ && !hasMacInputMonitoringPermission())
+        status = QObject::tr("Input Monitoring required");
+#endif
+    setStatus(status);
     if (!listening_) {
         tray_.setToolTip(error);
         if (requestPermission)

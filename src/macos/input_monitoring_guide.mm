@@ -160,9 +160,11 @@ NSPanel *makeGuidePanel(KeyBalloonsPermissionTile **tile)
     background.material = NSVisualEffectMaterialPopover;
     background.blendingMode = NSVisualEffectBlendingModeBehindWindow;
     background.state = NSVisualEffectStateActive;
-    background.wantsLayer = YES;
-    background.layer.cornerRadius = 14;
-    background.layer.masksToBounds = YES;
+    background.maskImage = [NSImage imageWithSize:frame.size flipped:NO drawingHandler:^BOOL(NSRect rect) {
+        [NSColor.blackColor setFill];
+        [[NSBezierPath bezierPathWithRoundedRect:rect xRadius:14 yRadius:14] fill];
+        return YES;
+    }];
 
     auto *heading = guideLabel(NSLocalizedString(@"Drag into Input Monitoring", nil),
                                NSMakeRect(12, 83, 266, 17));

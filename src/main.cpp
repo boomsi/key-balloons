@@ -128,6 +128,6 @@ int main(int argc, char *argv[])
     window.show();
     auto monitor = makeKeyboardMonitor();
     TrayControls tray(*monitor, window);
-    tray.start(false);
+    tray.start();
     return app.exec();
 }

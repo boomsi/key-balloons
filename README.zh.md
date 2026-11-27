@@ -17,7 +17,7 @@ Key Balloons 是一个 macOS 和 Windows 的桌面小工具。在任何应用里
 
 ### 在 macOS 上开启输入监控
 
-1. 从 Key Balloons 的菜单栏菜单选择 **Enable monitoring…**。
+1. 如果启动时提示需要权限，点 **Open Input Monitoring**。也可以稍后从菜单栏选择 **Enable monitoring…**。
 2. 系统会打开「隐私与安全性 → 输入监控」。把窗口下方卡片里的 **Key Balloons** 图标拖进列表。
 3. 在系统设置里打开开关。应用检测到权限生效后会收起卡片。如果 macOS 提示退出并重新打开应用，按系统提示操作。
 
