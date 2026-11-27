@@ -95,5 +95,7 @@ if(BUILD_TESTING)
   add_test(NAME key_balloons_qml COMMAND key_balloons_tests
     -platform offscreen -input "${CMAKE_CURRENT_SOURCE_DIR}/tests/tst_balloons.qml"
     -o -,txt -o "${CMAKE_CURRENT_BINARY_DIR}/qml-test-results.txt,txt")
-  set_tests_properties(key_balloons_qml PROPERTIES ENVIRONMENT "QT_QUICK_BACKEND=software")
+  # The offscreen platform has no native window handle for themed controls on Windows.
+  set_tests_properties(key_balloons_qml PROPERTIES ENVIRONMENT
+    "QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
 endif()
