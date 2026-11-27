@@ -93,6 +93,7 @@ if(BUILD_TESTING)
   qt_add_executable(key_balloons_tests tests/quick_test.cpp)
   target_link_libraries(key_balloons_tests PRIVATE Qt6::QuickTest Qt6::Quick)
   add_test(NAME key_balloons_qml COMMAND key_balloons_tests
-    -platform offscreen -input "${CMAKE_CURRENT_SOURCE_DIR}/tests/tst_balloons.qml")
+    -platform offscreen -input "${CMAKE_CURRENT_SOURCE_DIR}/tests/tst_balloons.qml"
+    -o -,txt -o "${CMAKE_CURRENT_BINARY_DIR}/qml-test-results.txt,txt")
   set_tests_properties(key_balloons_qml PROPERTIES ENVIRONMENT "QT_QUICK_BACKEND=software")
 endif()
