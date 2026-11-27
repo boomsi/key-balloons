@@ -18,6 +18,14 @@ set_target_properties(key_balloons PROPERTIES OUTPUT_NAME KeyBalloons)
 
 if(APPLE)
   enable_language(OBJCXX)
+  option(KEY_BALLOONS_DEVELOPMENT_BUILD "Use a separate macOS app identity for local development" OFF)
+  set(macos_bundle_name "Key Balloons")
+  set(macos_bundle_identifier "io.github.boomsi.keyballoons")
+  if(KEY_BALLOONS_DEVELOPMENT_BUILD)
+    set(macos_bundle_name "Key Balloons Dev")
+    string(APPEND macos_bundle_identifier ".dev")
+    set_target_properties(key_balloons PROPERTIES OUTPUT_NAME KeyBalloonsDev)
+  endif()
   find_library(APPKIT_FRAMEWORK AppKit REQUIRED)
   find_library(APPLICATION_SERVICES_FRAMEWORK ApplicationServices REQUIRED)
   find_library(CARBON_FRAMEWORK Carbon REQUIRED)
@@ -32,8 +40,8 @@ if(APPLE)
   target_link_libraries(key_balloons PRIVATE
     "${APPKIT_FRAMEWORK}" "${APPLICATION_SERVICES_FRAMEWORK}" "${CARBON_FRAMEWORK}")
   set_target_properties(key_balloons PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_NAME "Key Balloons"
-    MACOSX_BUNDLE_GUI_IDENTIFIER "io.github.boomsi.keyballoons"
+    MACOSX_BUNDLE_BUNDLE_NAME "${macos_bundle_name}"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "${macos_bundle_identifier}"
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/src/macos/Info.plist.in"
     MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")

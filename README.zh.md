@@ -40,10 +40,10 @@ Key Balloons 是一个 macOS 和 Windows 的桌面小工具。在任何应用里
 **macOS**
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
-open build/KeyBalloons.app
+open build/KeyBalloonsDev.app
 ```
 
 **Windows（PowerShell）**

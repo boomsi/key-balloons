@@ -40,10 +40,10 @@ You need CMake 3.21 or later, the Qt 6.10 desktop SDK with Qt Quick and Qt Quick
 **macOS**
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DKEY_BALLOONS_DEVELOPMENT_BUILD=ON -DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.3/macos"
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
-open build/KeyBalloons.app
+open build/KeyBalloonsDev.app
 ```
 
 **Windows (PowerShell)**
