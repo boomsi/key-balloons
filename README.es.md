@@ -6,7 +6,7 @@ Key Balloons muestra una caja flotante en el escritorio de macOS y Windows. Al e
 
 **[Descargar](https://github.com/boomsi/key-balloons/releases)** · [Instalación](#instalación) · [Uso](#uso) · [Compilar desde el código fuente](#compilar-desde-el-código-fuente) · [Guía de integración](docs/mouse-feedback.es.md)
 
-![Demostración de Key Balloons: las teclas flotan al escribir kissmenow](assets/key-balloons-demo.gif)
+![Demostración de Key Balloons: las teclas flotan al escribir star now](assets/key-balloons-demo.gif)
 
 > Las pulsaciones se usan en el dispositivo para mostrar la animación. La aplicación no guarda un historial ni envía pulsaciones por la red.
 
@@ -90,4 +90,4 @@ Ejecuta la prueba de animación continua en una sesión de escritorio.
 ./build/key_balloons_tests -input tests/tst_stress.qml
 ```
 
-En Windows, usa `./build/Release/key_balloons_tests.exe`. Para una comprobación rápida, escribe `A A B` en TextEdit o el Bloc de notas. El editor debe mantener el foco mientras las tres etiquetas suben y desaparecen por separado. Consulta la [lista de comprobaciones](TODO.es.md).
+En Windows, usa `./build/Release/key_balloons_tests.exe`. Para una comprobación rápida, escribe `A A B` en TextEdit o el Bloc de notas. El editor debe mantener el foco mientras las tres etiquetas suben y desaparecen por separado.

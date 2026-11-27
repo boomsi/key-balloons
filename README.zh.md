@@ -6,7 +6,7 @@ Key Balloons 是一个 macOS 和 Windows 的桌面小工具。在任何应用里
 
 **[下载安装包](https://github.com/boomsi/key-balloons/releases)** · [安装](#安装) · [使用](#使用) · [从源码构建](#从源码构建) · [接入指南](docs/mouse-feedback.zh.md)
 
-![Key Balloons 演示：输入 kissmenow 时，按键从盒子里浮起](assets/key-balloons-demo.gif)
+![Key Balloons 演示：输入 star now 时，按键从盒子里浮起](assets/key-balloons-demo.gif)
 
 > 键盘输入只在本机用来显示动画。应用不会保存按键记录或把按键发送到网络。
 
@@ -93,4 +93,4 @@ macOS 包内的应用使用临时签名。Apple 公证和 Windows 发行签名�
 ./build/key_balloons_tests -input tests/tst_stress.qml
 ```
 
-Windows 使用 `./build/Release/key_balloons_tests.exe`。也可以在 TextEdit 或记事本里敲 `A A B`，确认编辑器仍然有焦点，三个字符先后上升并独立消失。验证清单见 [TODO.md](TODO.md)。
+Windows 使用 `./build/Release/key_balloons_tests.exe`。也可以在 TextEdit 或记事本里敲 `A A B`，确认编辑器仍然有焦点，三个字符先后上升并独立消失。

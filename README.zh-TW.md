@@ -6,7 +6,7 @@ Key Balloons 是 macOS 和 Windows 的桌面懸浮工具。在任何 App 打字�
 
 **[下載安裝程式](https://github.com/boomsi/key-balloons/releases)** · [安裝](#安裝) · [使用](#使用) · [從原始碼建置](#從原始碼建置) · [整合指南](docs/mouse-feedback.zh-TW.md)
 
-![Key Balloons 示範：輸入 kissmenow 時，按鍵從盒子浮起](assets/key-balloons-demo.gif)
+![Key Balloons 示範：輸入 star now 時，按鍵從盒子浮起](assets/key-balloons-demo.gif)
 
 > 鍵盤輸入只在本機用於顯示動畫。App 不會保留按鍵記錄，也不會透過網路傳送按鍵。
 
@@ -90,4 +90,4 @@ ctest --test-dir build --build-config Release --output-on-failure
 ./build/key_balloons_tests -input tests/tst_stress.qml
 ```
 
-Windows 使用 `./build/Release/key_balloons_tests.exe`。也可在「文字編輯」或「記事本」輸入 `A A B`，確認編輯器保持焦點，三個標籤分別升起並消失。請參閱[測試清單](TODO.zh-TW.md)。
+Windows 使用 `./build/Release/key_balloons_tests.exe`。也可在「文字編輯」或「記事本」輸入 `A A B`，確認編輯器保持焦點，三個標籤分別升起並消失。

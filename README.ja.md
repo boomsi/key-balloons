@@ -6,7 +6,7 @@ Key Balloons は macOS と Windows 用のデスクトップオーバーレイで
 
 **[ダウンロード](https://github.com/boomsi/key-balloons/releases)** · [インストール](#インストール) · [使い方](#使い方) · [ソースからビルドする](#ソースからビルドする) · [連携ガイド](docs/mouse-feedback.ja.md)
 
-![Key Balloons のデモ。kissmenow と入力するとキーがボックスから浮かびます](assets/key-balloons-demo.gif)
+![Key Balloons のデモ。star now と入力するとキーがボックスから浮かびます](assets/key-balloons-demo.gif)
 
 > キー入力は端末上でアニメーションを表示するために使われます。入力履歴は保存せず、キー入力をネットワークに送信することもありません。
 
@@ -90,4 +90,4 @@ GitHub でリリースを公開すると **Release installers** が起動しま�
 ./build/key_balloons_tests -input tests/tst_stress.qml
 ```
 
-Windows では `./build/Release/key_balloons_tests.exe` を使用します。簡単な動作確認には、テキストエディットやメモ帳で `A A B` と入力してください。エディターのフォーカスを保ったまま、3 つのラベルが個別に表示されて消えます。[テストチェックリスト](TODO.ja.md)も参照できます。
+Windows では `./build/Release/key_balloons_tests.exe` を使用します。簡単な動作確認には、テキストエディットやメモ帳で `A A B` と入力してください。エディターのフォーカスを保ったまま、3 つのラベルが個別に表示されて消えます。

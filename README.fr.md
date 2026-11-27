@@ -6,7 +6,7 @@ Key Balloons affiche un boîtier flottant sur macOS et Windows. Lorsque vous tap
 
 **[Télécharger](https://github.com/boomsi/key-balloons/releases)** · [Installation](#installation) · [Utilisation](#utilisation) · [Compilation depuis les sources](#compilation-depuis-les-sources) · [Guide d’intégration](docs/mouse-feedback.fr.md)
 
-![Démonstration de Key Balloons : les touches flottent à mesure que l’on saisit kissmenow](assets/key-balloons-demo.gif)
+![Démonstration de Key Balloons : les touches flottent à mesure que l’on saisit star now](assets/key-balloons-demo.gif)
 
 > Les frappes servent à afficher les animations sur votre appareil. L’application ne conserve aucun historique des frappes et ne les transmet pas sur le réseau.
 
@@ -90,4 +90,4 @@ Exécutez le test d’animation prolongé dans une session de bureau.
 ./build/key_balloons_tests -input tests/tst_stress.qml
 ```
 
-Sous Windows, utilisez `./build/Release/key_balloons_tests.exe`. Pour un contrôle rapide, tapez `A A B` dans TextEdit ou le Bloc-notes. L’éditeur doit garder le focus et les trois libellés doivent disparaître séparément. Voir la [liste des vérifications](TODO.fr.md).
+Sous Windows, utilisez `./build/Release/key_balloons_tests.exe`. Pour un contrôle rapide, tapez `A A B` dans TextEdit ou le Bloc-notes. L’éditeur doit garder le focus et les trois libellés doivent disparaître séparément.

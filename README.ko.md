@@ -6,7 +6,7 @@ Key Balloons는 macOS와 Windows용 데스크톱 오버레이입니다. 어떤 �
 
 **[다운로드](https://github.com/boomsi/key-balloons/releases)** · [설치](#설치) · [사용](#사용) · [소스에서 빌드](#소스에서-빌드) · [연동 가이드](docs/mouse-feedback.ko.md)
 
-![Key Balloons 데모. kissmenow를 입력하면 상자에서 키가 떠오릅니다](assets/key-balloons-demo.gif)
+![Key Balloons 데모. star now를 입력하면 상자에서 키가 떠오릅니다](assets/key-balloons-demo.gif)
 
 > 키 입력은 기기에서 애니메이션을 표시하는 데만 사용됩니다. 키 입력 기록을 보관하거나 네트워크로 보내지 않습니다.
 
@@ -90,4 +90,4 @@ GitHub 릴리스를 게시하면 **Release installers**가 시작됩니다. 워�
 ./build/key_balloons_tests -input tests/tst_stress.qml
 ```
 
-Windows에서는 `./build/Release/key_balloons_tests.exe`를 사용합니다. 빠른 동작 확인은 텍스트 편집기나 메모장에서 `A A B`를 입력해 보세요. 편집기 포커스가 유지되고 키 이름 세 개가 각각 올라갔다 사라져야 합니다. [테스트 체크리스트](TODO.ko.md)를 참조하세요.
+Windows에서는 `./build/Release/key_balloons_tests.exe`를 사용합니다. 빠른 동작 확인은 텍스트 편집기나 메모장에서 `A A B`를 입력해 보세요. 편집기 포커스가 유지되고 키 이름 세 개가 각각 올라갔다 사라져야 합니다.

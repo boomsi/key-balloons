@@ -6,7 +6,7 @@ Key Balloons is a desktop overlay for macOS and Windows. As you type in any app,
 
 **[Download](https://github.com/boomsi/key-balloons/releases)** · [Install](#install) · [Use](#use) · [Build from source](#build-from-source) · [Integration guide](docs/mouse-feedback.md)
 
-![Key Balloons demo showing the keys from kissmenow floating as they are typed](assets/key-balloons-demo.gif)
+![Key Balloons demo showing the keys from star now floating as they are typed](assets/key-balloons-demo.gif)
 
 > Key Balloons uses keyboard input locally to display the animation. It keeps no keystroke history and sends no keystrokes over the network.
 
@@ -93,4 +93,4 @@ Use this command to run the sustained animation test on a desktop.
 ./build/key_balloons_tests -input tests/tst_stress.qml
 ```
 
-On Windows, use `./build/Release/key_balloons_tests.exe`. For a quick end-to-end check, type `A A B` in TextEdit or Notepad. The editor should keep focus while the three labels rise and disappear independently. See the [test checklist](TODO.en.md).
+On Windows, use `./build/Release/key_balloons_tests.exe`. For a quick end-to-end check, type `A A B` in TextEdit or Notepad. The editor should keep focus while the three labels rise and disappear independently.
