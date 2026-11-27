@@ -5,19 +5,54 @@ import QtQuick.Window
 
 Window {
     id: overlay
-    readonly property alias allowDragging: dragCheck.checked
+    property bool allowDragging: true
+    property int opacityPercent: 100
+    property bool nativeSettingsEnabled: false
+    property rect settingsWorkArea: Qt.rect(Screen.virtualX, Screen.virtualY,
+                                            Screen.width, Screen.height)
     readonly property alias flightWindow: flights
+    signal nativeSettingsRequested()
 
     width: glass.implicitWidth
     height: glass.implicitHeight + 5
     color: "transparent"
-    opacity: opacitySlider.value / 100
+    opacity: opacityPercent / 100
     title: qsTr("Key Balloons")
     flags: Qt.Tool | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.WindowDoesNotAcceptFocus
 
     function showKey(label: string) {
         field.spawn(label)
         glass.pulse()
+    }
+
+    function showSettings() {
+        if (nativeSettingsEnabled) {
+            nativeSettingsRequested()
+            return
+        }
+
+        const gap = 10
+        const margin = 8
+        const left = settingsWorkArea.x + margin
+        const right = settingsWorkArea.x + settingsWorkArea.width - margin
+        const top = settingsWorkArea.y + margin
+        const bottom = settingsWorkArea.y + settingsWorkArea.height - margin
+        const rightX = x + width + gap
+        const leftX = x - boxMenu.width - gap
+        const fitsRight = rightX + boxMenu.width <= right
+        if (fitsRight || leftX >= left) {
+            boxMenu.x = fitsRight ? rightX : leftX
+            const centeredY = y + (height - boxMenu.height) / 2
+            boxMenu.y = Math.round(Math.max(top, Math.min(centeredY, bottom - boxMenu.height)))
+        } else {
+            const roomAbove = y - top
+            const roomBelow = bottom - (y + height)
+            const centeredX = x + (width - boxMenu.width) / 2
+            boxMenu.x = Math.round(Math.max(left, Math.min(centeredX, right - boxMenu.width)))
+            boxMenu.y = roomAbove >= roomBelow ? y - boxMenu.height - gap : y + height + gap
+        }
+        boxMenu.show()
+        boxMenu.requestActivate()
     }
 
     GlassBox {
@@ -37,64 +72,72 @@ Window {
                     overlay.startSystemMove()
             }
             onClicked: mouse => {
-                if (mouse.button === Qt.RightButton) {
-                    boxMenu.x = mouse.x
-                    boxMenu.y = mouse.y
-                    boxMenu.open()
-                }
+                if (mouse.button === Qt.RightButton)
+                    overlay.showSettings()
             }
         }
     }
 
-    Popup {
+    Window {
         id: boxMenu
         objectName: "boxMenu"
-        parent: glass
-        popupType: Popup.Window
         width: 216
-        margins: 8
-        padding: 12
-        focus: true
+        height: settingsPane.implicitHeight
+        flags: Qt.Popup | Qt.FramelessWindowHint
+        color: "transparent"
+        onActiveChanged: if (!active) hide()
 
-        contentItem: ColumnLayout {
-            spacing: 8
+        Shortcut {
+            sequence: "Escape"
+            onActivated: boxMenu.hide()
+        }
 
-            CheckBox {
-                id: dragCheck
-                objectName: "allowDraggingCheck"
-                text: qsTr("Allow dragging")
-                checked: true
-                onClicked: boxMenu.close()
-            }
+        Pane {
+            id: settingsPane
+            anchors.fill: parent
+            padding: 12
 
-            RowLayout {
-                Layout.fillWidth: true
+            contentItem: ColumnLayout {
+                spacing: 8
 
-                Label {
-                    text: qsTr("Opacity")
+                Switch {
+                    objectName: "draggingSwitch"
+                    text: qsTr("Allow dragging")
+                    checked: overlay.allowDragging
+                    indicator.scale: 0.85
+                    onToggled: overlay.allowDragging = checked
+                }
+
+                RowLayout {
                     Layout.fillWidth: true
-                }
-                Label {
-                    text: qsTr("%1%").arg(opacitySlider.value.toFixed(0))
-                }
-            }
 
-            Slider {
-                id: opacitySlider
-                objectName: "opacitySlider"
-                Accessible.name: qsTr("Opacity")
-                Layout.fillWidth: true
-                from: 20
-                to: 100
-                value: 100
-                stepSize: 1
-                snapMode: Slider.SnapAlways
+                    Label {
+                        text: qsTr("Opacity")
+                        Layout.fillWidth: true
+                    }
+                    Label {
+                        text: qsTr("%1%").arg(overlay.opacityPercent)
+                    }
+                }
+
+                Slider {
+                    objectName: "opacitySlider"
+                    Accessible.name: qsTr("Opacity")
+                    Layout.fillWidth: true
+                    from: 20
+                    to: 100
+                    value: overlay.opacityPercent
+                    stepSize: 1
+                    snapMode: Slider.SnapAlways
+                    onMoved: overlay.opacityPercent = Math.round(value)
+                }
             }
         }
     }
 
     Window {
         id: flights
+        transientParent: overlay
         width: 360
         height: 265
         x: overlay.x + (overlay.width - width) / 2

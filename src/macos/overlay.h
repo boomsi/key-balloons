@@ -2,4 +2,4 @@
 
 class QWindow;
 
-void prepareMacOverlay(QWindow &window);
+void prepareMacOverlayGroup(QWindow &box, QWindow &animation);

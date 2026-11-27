@@ -21,7 +21,12 @@ if(APPLE)
   find_library(APPKIT_FRAMEWORK AppKit REQUIRED)
   find_library(APPLICATION_SERVICES_FRAMEWORK ApplicationServices REQUIRED)
   find_library(CARBON_FRAMEWORK Carbon REQUIRED)
-  target_sources(key_balloons PRIVATE src/macos/keyboard_monitor.cpp src/macos/overlay.mm)
+  target_sources(key_balloons PRIVATE
+    src/macos/keyboard_monitor.cpp src/macos/overlay.mm
+    src/macos/settings_popover.h src/macos/settings_popover.mm
+    src/macos/input_monitoring_guide.h src/macos/input_monitoring_guide.mm)
+  set_source_files_properties(src/macos/settings_popover.mm src/macos/input_monitoring_guide.mm
+    PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
   set_source_files_properties(assets/KeyBalloons.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   target_sources(key_balloons PRIVATE assets/KeyBalloons.icns)
   target_link_libraries(key_balloons PRIVATE

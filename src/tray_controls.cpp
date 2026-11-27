@@ -8,6 +8,10 @@
 #include <QPainter>
 #include <QQuickWindow>
 
+#ifdef Q_OS_MACOS
+#include "macos/input_monitoring_guide.h"
+#endif
+
 namespace {
 QIcon trayIcon()
 {
@@ -76,6 +80,16 @@ TrayControls::TrayControls(KeyboardMonitor &monitor, QQuickWindow &window)
 
 void TrayControls::start(bool requestPermission)
 {
+#ifdef Q_OS_MACOS
+    if (requestPermission && !hasMacInputMonitoringPermission()) {
+        if (!permissionGuide_) {
+            permissionGuide_ = std::make_unique<InputMonitoringGuide>(
+                hasMacInputMonitoringPermission, [this] { start(false); });
+        }
+        if (permissionGuide_->open())
+            return;
+    }
+#endif
     const auto error = monitor_.start(requestPermission);
     listening_ = error.isEmpty();
     setStatus(listening_ ? QObject::tr("Monitoring keyboard") : QObject::tr("Monitoring unavailable"));
@@ -85,6 +99,8 @@ void TrayControls::start(bool requestPermission)
             QMessageBox::information(nullptr, QObject::tr("Key Balloons"), error);
     }
 }
+
+TrayControls::~TrayControls() = default;
 
 void TrayControls::setStatus(const QString &summary)
 {

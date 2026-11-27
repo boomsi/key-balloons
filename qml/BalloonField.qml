@@ -3,7 +3,7 @@ import QtQuick
 Item {
     id: field
     readonly property int activeBalloonCount: flights.children.length
-    property int lifetimeMs: 2800
+    property int lifetimeMs: 2000
     property bool dark: true
     property int nextLane: 0
     readonly property var launchOffsets: [0, 26, -26, 35, -35, 13, -13]

@@ -46,11 +46,12 @@ TestCase {
 
     function test_sustainedTyping() {
         const start = Date.now()
+        const keyIntervalMs = 50
         let peak = 0
         measuring = true
 
         for (let index = 0; index < 600; index++) {
-            const remaining = start + index * 50 - Date.now()
+            const remaining = start + index * keyIntervalMs - Date.now()
             if (remaining > 0)
                 wait(remaining)
 
@@ -60,9 +61,10 @@ TestCase {
             peak = Math.max(peak, field.activeBalloonCount)
         }
 
-        tryCompare(field, "activeBalloonCount", 0, 3200)
+        tryCompare(field, "activeBalloonCount", 0, field.lifetimeMs + 400)
         measuring = false
-        verify(peak >= 45, "Only " + peak + " balloons were simultaneously active")
+        const expectedPeak = Math.floor(field.lifetimeMs / keyIntervalMs)
+        verify(peak >= expectedPeak * 0.8, "Only " + peak + " balloons were simultaneously active")
         verify(frameIntervals.length > 0, "The test window did not present any frames")
         compare(framesAfterSpawn.length, 600)
         console.info("Key Balloons stress: 600 inputs, peak " + peak

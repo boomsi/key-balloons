@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-15
+          - os: macos-26
             qt-arch: clang_64
             platform: macos
             extension: dmg
@@ -42,7 +42,7 @@ jobs:
 
       - name: Configure macOS universal build
         if: runner.os == 'macOS'
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
       - name: Configure Windows x64 build
         if: runner.os == 'Windows'
         run: cmake -S . -B build -A x64

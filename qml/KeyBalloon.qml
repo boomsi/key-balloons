@@ -11,8 +11,8 @@ Item {
     required property real tilt
     required property bool dark
 
-    width: Math.max(40, caption.implicitWidth + 22)
-    height: 34
+    width: caption.implicitWidth + 2
+    height: caption.implicitHeight + 2
     x: originX - width / 2
     y: originY - height / 2
     scale: 0.86
@@ -22,34 +22,15 @@ Item {
         flight.start()
     }
 
-    Rectangle {
-        anchors.fill: parent
-        radius: height / 2
-        border.width: 1
-        border.color: balloon.dark ? "#78dfefff" : "#b4ffffff"
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: balloon.dark ? "#e6576886" : "#f5ffffff" }
-            GradientStop { position: 0.53; color: balloon.dark ? "#eb2c3951" : "#eadde8fa" }
-            GradientStop { position: 1.0; color: balloon.dark ? "#f01b283d" : "#e2aebfdb" }
-        }
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: 2
-        radius: height / 2
-        color: "transparent"
-        border.width: 1
-        border.color: balloon.dark ? "#2322d4ff" : "#31ffffff"
-    }
-
     Text {
         id: caption
         anchors.centerIn: parent
         text: balloon.label
         textFormat: Text.PlainText
         color: balloon.dark ? "#f2f7ff" : "#1d2c48"
-        font.pixelSize: 14
+        style: Text.Outline
+        styleColor: balloon.dark ? "#172137" : "#eaf4ff"
+        font.pixelSize: 22
         font.weight: Font.DemiBold
     }
 
